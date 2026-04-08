@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenCoWork UX Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+	--bg-primary: #0a0a0f;
+	--bg-secondary: #12121a;
+	--bg-tertiary: #1a1a28;
+	--bg-glass: rgba(20, 20, 35, 0.72);
+	--bg-glass-hover: rgba(30, 30, 50, 0.85);
+	--accent-primary: #7c5cfc;
+	--accent-primary-soft: rgba(124, 92, 252, 0.15);
+	--accent-secondary: #5ce0d8;
+	--accent-secondary-soft: rgba(92, 224, 216, 0.15);
+	--accent-warm: #fc7c5c;
+	--text-primary: #e8e6f0;
+	--text-secondary: #9896a8;
+	--text-tertiary: #6b6980;
+	--border-subtle: rgba(255, 255, 255, 0.06);
+	--border-default: rgba(255, 255, 255, 0.1);
+	--border-strong: rgba(255, 255, 255, 0.18);
+	--shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+	--shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+	--shadow-glow: 0 0 20px rgba(124, 92, 252, 0.2);
+	--shadow-glow-strong: 0 0 40px rgba(124, 92, 252, 0.35);
+	--radius-sm: 6px;
+	--radius-md: 10px;
+	--radius-lg: 16px;
+	--radius-xl: 24px;
+	--radius-full: 9999px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; width: 100%; overflow: hidden; }
+body {
+	font-family: 'Inter', -apple-system, system-ui, sans-serif;
+	background: var(--bg-primary);
+	color: var(--text-primary);
+	-webkit-font-smoothing: antialiased;
+}
+
+/* App Shell */
+.app { display: grid; grid-template-columns: 280px 1fr; height: 100vh; }
+
+/* Sidebar */
+.sidebar {
+	background: var(--bg-secondary);
+	border-right: 1px solid var(--border-subtle);
+	display: flex; flex-direction: column;
+}
+.sidebar-header {
+	padding: 20px; border-bottom: 1px solid var(--border-subtle);
+	display: flex; align-items: center; justify-content: space-between;
+}
+.logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; letter-spacing: -0.02em; }
+.logo-icon {
+	width: 32px; height: 32px;
+	background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+	border-radius: var(--radius-sm);
+	display: flex; align-items: center; justify-content: center;
+	font-size: 16px;
+}
+.cmd-trigger {
+	display: flex; align-items: center; gap: 8px;
+	padding: 8px 14px; margin: 14px 14px 0;
+	background: var(--bg-tertiary); border: 1px solid var(--border-subtle);
+	border-radius: var(--radius-md); cursor: pointer;
+	color: var(--text-tertiary); font-size: 13px;
+}
+.cmd-trigger kbd {
+	margin-left: auto; background: var(--bg-primary);
+	border: 1px solid var(--border-default); border-radius: 4px;
+	padding: 1px 6px; font-family: 'JetBrains Mono', monospace;
+	font-size: 11px; color: var(--text-tertiary);
+}
+.session-list { flex: 1; overflow-y: auto; padding: 14px; }
+.group-label {
+	font-size: 11px; font-weight: 600; text-transform: uppercase;
+	letter-spacing: 0.08em; color: var(--text-tertiary);
+	padding: 8px 10px; margin-top: 6px;
+}
+.session {
+	display: flex; align-items: center; gap: 8px;
+	padding: 8px 14px; border-radius: var(--radius-md);
+	cursor: pointer; color: var(--text-secondary); font-size: 13px;
+	transition: all 0.15s ease;
+}
+.session:hover { background: var(--bg-glass-hover); color: var(--text-primary); }
+.session.active {
+	background: var(--accent-primary-soft); color: var(--accent-primary);
+	border: 1px solid rgba(124, 92, 252, 0.2);
+}
+.session-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.session-time { font-size: 11px; color: var(--text-tertiary); flex-shrink: 0; }
+.session-pin { opacity: 0; color: var(--accent-warm); font-size: 12px; transition: opacity 0.15s; }
+.session:hover .session-pin { opacity: 1; }
+
+/* Main Content */
+.main { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+/* Top Bar */
+.top-bar {
+	display: flex; align-items: center; justify-content: space-between;
+	padding: 12px 24px; border-bottom: 1px solid var(--border-subtle);
+	background: var(--bg-secondary); flex-shrink: 0;
+}
+.top-title { font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.top-title span { font-size: 11px; color: var(--text-tertiary); }
+.top-actions { display: flex; gap: 6px; }
+.toolbar-btn {
+	background: transparent; border: none; color: var(--text-tertiary);
+	cursor: pointer; padding: 4px 8px; border-radius: var(--radius-sm);
+	font-size: 13px; transition: all 0.15s;
+}
+.toolbar-btn:hover { background: var(--bg-glass-hover); color: var(--text-secondary); }
+
+/* Chat */
+.chat { flex: 1; overflow-y: auto; padding: 24px 32px; }
+.msg { display: flex; gap: 14px; margin-bottom: 24px; animation: msgIn 0.25s cubic-bezier(0.16,1,0.3,1); }
+@keyframes msgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.avatar {
+	width: 32px; height: 32px; border-radius: var(--radius-full);
+	flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+	font-size: 13px; font-weight: 600;
+}
+.avatar.user { background: linear-gradient(135deg, var(--accent-primary), #9f7cfc); color: white; }
+.avatar.ai { background: linear-gradient(135deg, var(--accent-secondary), #5ce0a0); color: #0a0a0f; }
+.msg-body { flex: 1; min-width: 0; }
+.msg-header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+.msg-name { font-weight: 600; font-size: 13px; }
+.msg-time { font-size: 11px; color: var(--text-tertiary); }
+.msg-content { font-size: 14px; line-height: 1.7; color: var(--text-primary); }
+.msg-content code {
+	background: var(--bg-tertiary); border: 1px solid var(--border-subtle);
+	border-radius: 4px; padding: 1px 6px;
+	font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+}
+.msg-content pre {
+	background: var(--bg-tertiary); border: 1px solid var(--border-subtle);
+	border-radius: var(--radius-md); padding: 14px; margin: 8px 0;
+	overflow-x: auto; font-family: 'JetBrains Mono', monospace;
+	font-size: 13px; line-height: 1.5;
+}
+.msg-content table { border-collapse: collapse; margin: 10px 0; font-size: 13px; }
+.msg-content th, .msg-content td {
+	padding: 6px 14px; border: 1px solid var(--border-subtle); text-align: left;
+}
+.msg-content th { background: var(--bg-tertiary); font-weight: 600; }
+.msg-content strong { color: var(--accent-secondary); }
+.msg-actions {
+	display: flex; gap: 4px; margin-top: 8px;
+	opacity: 0; transition: opacity 0.15s;
+}
+.msg:hover .msg-actions { opacity: 1; }
+.msg-action {
+	background: var(--bg-tertiary); border: 1px solid var(--border-subtle);
+	border-radius: var(--radius-sm); padding: 2px 8px; cursor: pointer;
+	font-size: 12px; color: var(--text-tertiary); transition: all 0.15s;
+}
+.msg-action:hover { background: var(--bg-glass-hover); color: var(--text-secondary); }
+
+/* Tool call */
+.tool-call {
+	display: flex; align-items: center; gap: 8px;
+	padding: 8px 14px; margin: 8px 0;
+	background: var(--accent-primary-soft);
+	border: 1px solid rgba(124, 92, 252, 0.15);
+	border-radius: var(--radius-md); font-size: 12px;
+	color: var(--accent-primary); font-family: 'JetBrains Mono', monospace;
+}
+.tool-call.running { border-color: var(--accent-secondary); color: var(--accent-secondary); }
+.tool-spinner {
+	width: 12px; height: 12px;
+	border: 2px solid var(--accent-secondary-soft);
+	border-top-color: var(--accent-secondary);
+	border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Typing */
+.typing { display: flex; gap: 4px; padding: 8px 14px; }
+.typing-dot {
+	width: 6px; height: 6px; background: var(--text-tertiary);
+	border-radius: 50%; animation: bounce 1.4s infinite ease-in-out;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,80%,100% { transform: scale(0.7); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+
+/* Input */
+.input-area { padding: 14px 32px 20px; flex-shrink: 0; }
+.input-box {
+	position: relative; background: var(--bg-glass);
+	backdrop-filter: blur(20px); border: 1px solid var(--border-default);
+	border-radius: var(--radius-lg); transition: all 0.15s ease;
+	box-shadow: var(--shadow-md);
+}
+.input-box:focus-within { border-color: var(--accent-primary); box-shadow: var(--shadow-glow); }
+textarea {
+	width: 100%; background: transparent; border: none; outline: none;
+	color: var(--text-primary); font-family: 'Inter', sans-serif;
+	font-size: 14px; line-height: 1.6; padding: 14px 20px;
+	resize: none; height: 52px;
+}
+textarea::placeholder { color: var(--text-tertiary); }
+.input-toolbar {
+	display: flex; align-items: center; justify-content: space-between;
+	padding: 8px 14px; border-top: 1px solid var(--border-subtle);
+}
+.input-left, .input-right { display: flex; align-items: center; gap: 4px; }
+.send-btn {
+	background: var(--accent-primary); color: white; border: none;
+	border-radius: var(--radius-md); padding: 8px 16px;
+	cursor: pointer; font-weight: 600; font-size: 13px;
+	transition: all 0.15s ease; display: flex; align-items: center; gap: 4px;
+}
+.send-btn:hover { background: #6a4ae8; box-shadow: var(--shadow-glow); transform: translateY(-1px); }
+
+/* Status Bar */
+.status-bar {
+	display: flex; align-items: center; justify-content: space-between;
+	padding: 4px 14px; background: var(--bg-primary);
+	border-top: 1px solid var(--border-subtle); font-size: 11px;
+	color: var(--text-tertiary); flex-shrink: 0;
+}
+.status-item { display: flex; align-items: center; gap: 4px; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-secondary); }
+
+/* Command Palette Overlay */
+.cmd-overlay {
+	position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+	backdrop-filter: blur(4px); z-index: 100;
+	display: flex; justify-content: center; padding-top: 20vh;
+}
+.cmd-palette {
+	width: 560px; max-height: 420px; background: var(--bg-secondary);
+	border: 1px solid var(--border-default); border-radius: var(--radius-xl);
+	box-shadow: var(--shadow-lg), var(--shadow-glow-strong);
+	overflow: hidden; animation: slideUp 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.cmd-input {
+	width: 100%; background: transparent; border: none; outline: none;
+	color: var(--text-primary); font-family: 'Inter', sans-serif;
+	font-size: 16px; padding: 20px; border-bottom: 1px solid var(--border-subtle);
+}
+.cmd-input::placeholder { color: var(--text-tertiary); }
+.cmd-results { padding: 8px; }
+.cmd-group { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-tertiary); padding: 8px 14px; }
+.cmd-item {
+	display: flex; align-items: center; gap: 14px;
+	padding: 8px 14px; border-radius: var(--radius-md);
+	cursor: pointer; transition: background 0.15s;
+}
+.cmd-item:hover, .cmd-item.selected { background: var(--accent-primary-soft); }
+.cmd-icon {
+	width: 28px; height: 28px; background: var(--bg-tertiary);
+	border-radius: var(--radius-sm); display: flex; align-items: center;
+	justify-content: center; font-size: 14px; flex-shrink: 0;
+}
+.cmd-text { flex: 1; }
+.cmd-title { font-size: 13px; font-weight: 500; }
+.cmd-desc { font-size: 11px; color: var(--text-tertiary); }
+.cmd-keys { display: flex; gap: 3px; }
+.cmd-keys kbd {
+	background: var(--bg-tertiary); border: 1px solid var(--border-default);
+	border-radius: 4px; padding: 1px 5px;
+	font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-tertiary);
+}
+
+/* Toast */
+.toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 200; display: flex; flex-direction: column; gap: 8px; }
+.toast {
+	background: var(--bg-glass); backdrop-filter: blur(20px);
+	border: 1px solid var(--border-default); border-radius: var(--radius-md);
+	padding: 14px 20px; min-width: 300px; box-shadow: var(--shadow-lg);
+	animation: toastIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+	display: flex; align-items: center; gap: 14px;
+}
+.toast.success { border-left: 3px solid var(--accent-secondary); }
+@keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="app">
+	<!-- Sidebar -->
+	<aside class="sidebar">
+		<div class="sidebar-header">
+			<div class="logo">
+				<div class="logo-icon">🦀</div>
+				<span>OpenCoWork</span>
+			</div>
+		</div>
+		<div class="cmd-trigger">
+			<span>🔍</span>
+			<span>Search or command...</span>
+			<kbd>⌘K</kbd>
+		</div>
+		<div class="session-list">
+			<div class="group-label">Pinned</div>
+			<div class="session active">
+				<span class="session-title">OpenCoWork Architecture</span>
+				<span class="session-time">1h</span>
+			</div>
+			<div class="session">
+				<span class="session-title">Rust Performance Tuning</span>
+				<span class="session-time">2h</span>
+			</div>
+			<div class="group-label">Recent</div>
+			<div class="session">
+				<span class="session-title">Telegram Bot Integration</span>
+				<span class="session-time">1d</span>
+				<span class="session-pin">📌</span>
+			</div>
+			<div class="session">
+				<span class="session-title">Mojo Inference Acceleration</span>
+				<span class="session-time">2d</span>
+				<span class="session-pin">📌</span>
+			</div>
+			<div class="session">
+				<span class="session-title">Frontend Design System</span>
+				<span class="session-time">3d</span>
+				<span class="session-pin">📌</span>
+			</div>
+			<div class="session">
+				<span class="session-title">Deploy to Production</span>
+				<span class="session-time">5d</span>
+				<span class="session-pin">📌</span>
+			</div>
+		</div>
+	</aside>
+
+	<!-- Main -->
+	<div class="main">
+		<div class="top-bar">
+			<div class="top-title">
+				OpenCoWork Architecture
+				<span>24 messages</span>
+			</div>
+			<div class="top-actions">
+				<button class="toolbar-btn" title="Pin">📌</button>
+				<button class="toolbar-btn" title="Export">📤</button>
+				<button class="toolbar-btn" title="Settings">⚙️</button>
+			</div>
+		</div>
+
+		<div class="chat">
+			<!-- User message -->
+			<div class="msg">
+				<div class="avatar user">M</div>
+				<div class="msg-body">
+					<div class="msg-header">
+						<span class="msg-name">You</span>
+						<span class="msg-time">2m ago</span>
+					</div>
+					<div class="msg-content">Can you analyze the performance difference between our Rust Axum server and the TypeScript Bun server?</div>
+					<div class="msg-actions">
+						<button class="msg-action">📋 Copy</button>
+						<button class="msg-action">🔄 Regenerate</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- AI response -->
+			<div class="msg">
+				<div class="avatar ai">OW</div>
+				<div class="msg-body">
+					<div class="msg-header">
+						<span class="msg-name">OpenCoWork</span>
+						<span class="msg-time">1m ago</span>
+					</div>
+					<div class="msg-content">
+						Here's the breakdown:
+						<table>
+							<tr><th>Metric</th><th>Bun (TS)</th><th>Axum (Rust)</th><th>Delta</th></tr>
+							<tr><td>Startup</td><td>~800ms</td><td>~12ms</td><td><strong>67x</strong></td></tr>
+							<tr><td>Idle RAM</td><td>85MB</td><td>8MB</td><td><strong>10x</strong></td></tr>
+							<tr><td>Routing</td><td>15ms</td><td>0.3ms</td><td><strong>50x</strong></td></tr>
+							<tr><td>Binary</td><td>180MB</td><td>12MB</td><td><strong>15x</strong></td></tr>
+						</table>
+						<br>
+						The Axum server uses <code>tokio::sync::broadcast</code> for SSE fan-out and <code>dashmap::DashMap</code> for lock-free concurrent state — both eliminate the GC pauses inherent in Bun's V8 runtime.
+					</div>
+					<div class="tool-call">
+						<span>🔧 cargo_bench</span>
+						<span style="margin-left:auto;font-size:11px">12.3ms startup, 0.31ms routing</span>
+					</div>
+					<div class="msg-actions">
+						<button class="msg-action">📋 Copy</button>
+						<button class="msg-action">🔄 Regenerate</button>
+						<button class="msg-action">👍</button>
+						<button class="msg-action">👎</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- User message 2 -->
+			<div class="msg">
+				<div class="avatar user">M</div>
+				<div class="msg-body">
+					<div class="msg-header">
+						<span class="msg-name">You</span>
+						<span class="msg-time">30s ago</span>
+					</div>
+					<div class="msg-content">What about the Mojo acceleration for inference-adjacent compute?</div>
+					<div class="msg-actions">
+						<button class="msg-action">📋 Copy</button>
+						<button class="msg-action">🔄 Regenerate</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- AI typing -->
+			<div class="msg">
+				<div class="avatar ai">OW</div>
+				<div class="msg-body">
+					<div class="typing">
+						<div class="typing-dot"></div>
+						<div class="typing-dot"></div>
+						<div class="typing-dot"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Input -->
+		<div class="input-area">
+			<div class="input-box">
+				<textarea placeholder="Ask anything... (Enter to send, Shift+Enter for new line)"></textarea>
+				<div class="input-toolbar">
+					<div class="input-left">
+						<button class="toolbar-btn">📎 Attach</button>
+						<button class="toolbar-btn">💻 Code</button>
+						<button class="toolbar-btn">🌐 Search</button>
+					</div>
+					<div class="input-right">
+						<button class="send-btn">Send ↵</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Status Bar -->
+		<div class="status-bar">
+			<div style="display:flex;gap:14px">
+				<div class="status-item"><div class="status-dot"></div><span>Connected</span></div>
+				<div class="status-item"><span>🦀 Axum Server</span></div>
+				<div class="status-item"><span>⚡ 12ms latency</span></div>
+			</div>
+			<div style="display:flex;gap:14px">
+				<div class="status-item"><span>v0.1.0</span></div>
+				<div class="status-item"><span>⌘K Commands</span></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Command Palette -->
+<div class="cmd-overlay">
+	<div class="cmd-palette">
+		<input class="cmd-input" placeholder="Type a command or search..." value="perf" autofocus>
+		<div class="cmd-results">
+			<div class="cmd-group">Actions</div>
+			<div class="cmd-item selected">
+				<div class="cmd-icon">📊</div>
+				<div class="cmd-text">
+					<div class="cmd-title">View Benchmarks</div>
+					<div class="cmd-desc">Performance metrics dashboard</div>
+				</div>
+			</div>
+			<div class="cmd-item">
+				<div class="cmd-icon">⚡</div>
+				<div class="cmd-text">
+					<div class="cmd-title">Performance Settings</div>
+					<div class="cmd-desc">Configure server performance options</div>
+				</div>
+			</div>
+			<div class="cmd-item">
+				<div class="cmd-icon">➕</div>
+				<div class="cmd-text">
+					<div class="cmd-title">New Session</div>
+					<div class="cmd-desc">Start a fresh conversation</div>
+				</div>
+				<div class="cmd-keys"><kbd>⌘</kbd><kbd>N</kbd></div>
+			</div>
+			<div class="cmd-item">
+				<div class="cmd-icon">📁</div>
+				<div class="cmd-text">
+					<div class="cmd-title">Open Workspace</div>
+					<div class="cmd-desc">Load a project directory</div>
+				</div>
+				<div class="cmd-keys"><kbd>⌘</kbd><kbd>O</kbd></div>
+			</div>
+			<div class="cmd-item">
+				<div class="cmd-icon">⚙️</div>
+				<div class="cmd-text">
+					<div class="cmd-title">Settings</div>
+					<div class="cmd-desc">Configure OpenCoWork</div>
+				</div>
+				<div class="cmd-keys"><kbd>⌘</kbd><kbd>,</kbd></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Toast -->
+<div class="toast-container">
+	<div class="toast success">
+		<span>✅</span>
+		<span>Server connected — Axum v0.8, 12ms latency</span>
+	</div>
+</div>
+</body>
+</html>
