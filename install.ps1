@@ -117,9 +117,17 @@ Show-Banner
 Write-Color "  To re-run this installer later:" "Cyan"
 Write-Color "  irm https://raw.githubusercontent.com/multidimensionalinteractive/HyperCowork/main/install.ps1 | iex" "White"
 Write-Host ""
-Write-Color "  Press ENTER to continue or Ctrl+C to cancel..." "Yellow"
-Read-Host
-Write-Host ""
+
+# Only wait for input if running interactively
+try {
+    if ([Environment]::UserInteractive -and !$MyInvocation.ExpectingInput) {
+        Write-Color "  Press ENTER to continue or Ctrl+C to cancel..." "Yellow"
+        $null = Read-Host
+        Write-Host ""
+    }
+} catch {
+    # Running via pipeline, skip pause
+}
 
 # Check Windows version
 $winVer = [System.Environment]::OSVersion.Version
