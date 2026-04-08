@@ -13,7 +13,7 @@ use tracing_subscriber::{fmt, EnvFilter};
 /// A Rust replacement for the TypeScript/Bun OpenWork server,
 /// built with Axum for maximum throughput and minimal latency.
 #[derive(Debug, Parser)]
-#[command(name = "opencowork-server", version, about)]
+#[command(name = "hypercowork-server", version, about)]
 struct Cli {
     /// Workspace root directory.
     #[arg(short, long, env = "OPENCOWORK_WORKSPACE", default_value = ".")]
@@ -84,7 +84,7 @@ async fn main() -> anyhow::Result<()> {
         port = cli.port,
         host = %cli.host,
         approval_mode = %cli.approval,
-        "starting opencowork-server"
+        "starting hypercowork-server"
     );
 
     // Build server config

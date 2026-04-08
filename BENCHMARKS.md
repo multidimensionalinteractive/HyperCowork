@@ -74,13 +74,13 @@ All benchmarks run on: AMD Ryzen 9 7950X, 64GB RAM, NVMe SSD, Linux 6.8
 
 ```bash
 # Server benchmarks
-cargo bench -p opencowork-server
+cargo bench -p hypercowork-server
 
 # Router benchmarks
-cargo bench -p opencowork-router
+cargo bench -p hypercowork-router
 
 # Text processing benchmarks
-cargo bench -p opencowork-text
+cargo bench -p hypercowork-text
 
 # All benchmarks
 cargo bench

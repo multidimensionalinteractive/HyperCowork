@@ -2,13 +2,13 @@
 #
 # Automates full setup: Rust, llama.cpp, OpenCoWork, models
 # Run in PowerShell as Administrator:
-#   irm https://raw.githubusercontent.com/multidimensionalinteractive/opencowork-rust/main/install.ps1 | iex
+#   irm https://raw.githubusercontent.com/multidimensionalinteractive/hypercowork-rust/main/install.ps1 | iex
 #
 # Or download and run:
 #   .\install.ps1
 
 param(
-    [string]$InstallDir = "$env:USERPROFILE\opencowork",
+    [string]$InstallDir = "$env:USERPROFILE\hypercowork",
     [switch]$SkipRust,
     [switch]$SkipLlama,
     [switch]$SkipModels,
@@ -20,7 +20,7 @@ $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
 
 $VERSION = "0.1.0"
-$REPO = "multidimensionalinteractive/opencowork-rust"
+$REPO = "multidimensionalinteractive/hypercowork-rust"
 $LLAMA_CPP_REPO = "ggml-org/llama.cpp"
 
 # Colors for output
@@ -95,7 +95,7 @@ function Show-Help {
     Write-Host "    .\install.ps1 [options]"
     Write-Host ""
     Write-Color "  OPTIONS:" "Yellow"
-    Write-Host "    -InstallDir <path>   Installation directory (default: ~\opencowork)"
+    Write-Host "    -InstallDir <path>   Installation directory (default: ~\hypercowork)"
     Write-Host "    -SkipRust            Skip Rust installation"
     Write-Host "    -SkipLlama           Skip llama.cpp installation"
     Write-Host "    -SkipModels          Skip model downloads"
@@ -105,7 +105,7 @@ function Show-Help {
     Write-Color "  EXAMPLES:" "Yellow"
     Write-Host "    .\install.ps1                              # Full install"
     Write-Host "    .\install.ps1 -Cuda                        # With GPU acceleration"
-    Write-Host "    .\install.ps1 -InstallDir D:\ai\opencowork  # Custom path"
+    Write-Host "    .\install.ps1 -InstallDir D:\ai\hypercowork  # Custom path"
     Write-Host "    .\install.ps1 -SkipModels                   # Don't download models"
     Write-Host ""
     exit 0
@@ -228,21 +228,21 @@ if (-not (Test-Path $buildDir)) {
 Write-Step "Building server (release mode)..."
 Push-Location $buildDir
 $buildStart = Get-Date
-& cargo build --release -p opencowork-server 2>$null
+& cargo build --release -p hypercowork-server 2>$null
 $buildTime = [math]::Round(((Get-Date) - $buildStart).TotalSeconds, 1)
 
 if ($LASTEXITCODE -eq 0) {
-    Copy-Item "$buildDir\target\release\opencowork-server.exe" "$InstallDir\bin\" -Force
-    Write-Done "Server built in ${buildTime}s → $InstallDir\bin\opencowork-server.exe"
+    Copy-Item "$buildDir\target\release\hypercowork-server.exe" "$InstallDir\bin\" -Force
+    Write-Done "Server built in ${buildTime}s → $InstallDir\bin\hypercowork-server.exe"
 } else {
     Write-Error "Server build failed"
 }
 
 Write-Step "Building router..."
-& cargo build --release -p opencowork-router 2>$null
+& cargo build --release -p hypercowork-router 2>$null
 if ($LASTEXITCODE -eq 0) {
-    Copy-Item "$buildDir\target\release\opencowork-router.exe" "$InstallDir\bin\" -Force
-    Write-Done "Router built → $InstallDir\bin\opencowork-router.exe"
+    Copy-Item "$buildDir\target\release\hypercowork-router.exe" "$InstallDir\bin\" -Force
+    Write-Done "Router built → $InstallDir\bin\hypercowork-router.exe"
 } else {
     Write-Error "Router build failed"
 }
@@ -441,7 +441,7 @@ echo.
 echo   🦀 Starting OpenCoWork Server...
 echo.
 cd /d "$InstallDir"
-"$InstallDir\bin\opencowork-server.exe" --workspace "%cd%" --config "$InstallDir\config\server.toml"
+"$InstallDir\bin\hypercowork-server.exe" --workspace "%cd%" --config "$InstallDir\config\server.toml"
 pause
 "@
 $startServerPath = "$InstallDir\Start Server.bat"

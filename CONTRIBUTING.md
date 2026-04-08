@@ -7,8 +7,8 @@
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 # Clone
-git clone https://github.com/multidimensionalinteractive/opencowork-rust.git
-cd opencowork-rust
+git clone https://github.com/multidimensionalinteractive/hypercowork-rust.git
+cd hypercowork-rust
 
 # Build
 cargo build

@@ -5,7 +5,7 @@ use hypercowork_router::{RouterConfig, RouterCore};
 use tracing_subscriber::EnvFilter;
 
 #[derive(Parser)]
-#[command(name = "opencowork-router", about = "OpenCoWork message router")]
+#[command(name = "hypercowork-router", about = "HyperCoWork message router")]
 struct Cli {
     /// Path to router config file (TOML).
     #[arg(short, long, default_value = "router.toml")]
@@ -25,7 +25,7 @@ async fn main() -> anyhow::Result<()> {
         .json()
         .init();
 
-    tracing::info!(config = %cli.config, "starting opencowork-router");
+        tracing::info!(config = %cli.config, "starting hypercowork-router");
 
     // Load config (fall back to defaults)
     let config = if std::path::Path::new(&cli.config).exists() {
