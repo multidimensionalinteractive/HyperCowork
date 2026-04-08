@@ -1,13 +1,15 @@
 ```
-  ╔══════════════════════════════════════════╗
-  ║  🦀 RUST-Powered  •  ⚡ BLAZING FAST   ║
-  ║  HyperCoWork — Claude Cowork Alternative ║
-  ╚══════════════════════════════════════════╝
+ ╔═══════════════════════════════════════╗
+ ║   HYPER · AGENT · COWORK · FLEET     ║
+ ║          CONTROL SYSTEM               ║
+ ╚═══════════════════════════════════════╝
 ```
 
-# HyperCoWork Rust 🦀
+# HyperCoWork
 
-**A high-performance Rust refactor of [OpenWork](https://github.com/different-ai/openwork)** — the open-source Claude Cowork/Codex alternative.
+**Hyper Agent CoWork Fleet Control** — A high-performance Rust control center for managing Hermes agents across multiple environments.
+
+*Formerly "OpenCoWork Rust" — now evolved into a unified fleet management system.*
 
 ## Key Features
 
