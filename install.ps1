@@ -114,7 +114,11 @@ if ($Help) { Show-Help }
 # ─── Pre-flight Checks ───
 Show-Banner
 
-Write-Color "  Checking system..." "DarkGray"
+Write-Color "  To re-run this installer later:" "Cyan"
+Write-Color "  irm https://raw.githubusercontent.com/multidimensionalinteractive/HyperCowork/main/install.ps1 | iex" "White"
+Write-Host ""
+Write-Color "  Press ENTER to continue or Ctrl+C to cancel..." "Yellow"
+Read-Host
 Write-Host ""
 
 # Check Windows version
