@@ -19,6 +19,7 @@
 | **Background agents** | Agents work in the background while you continue your day. Deliver results when done. |
 | **Web search** | Integrated web search for research tasks. Multi-step research without manual effort. |
 | **Telegram & Slack** | Message your agent from Telegram or Slack while it works on a cloud VM. Cross-platform continuity. |
+| **Hermes Dashboard** | Connect existing Hermes bots to get a unified control center with monitoring, kanban, and cost tracking. |
 | **Automatic knowledge graph** | Agent builds and maintains a knowledge graph of your projects, preferences, and history. |
 | **🦀 Rust-powered** | 10x faster server, 5x less RAM. Single binary, zero Node runtime. |
 | **User-Friendly Installer** | Interactive setup wizard guides you through configuration. No more config file hunting. |
@@ -572,7 +573,34 @@ Run `cargo bench` to generate benchmarks. Results are compared against the TypeS
 
 ## 🤖 Hermes Agent Integration
 
-OpenCoWork can serve as the **control center** for your Hermes agent fleet. Connect your Hermes instances to get unified monitoring, project management, and automation.
+OpenCoWork serves as the **control center** for your Hermes agent fleet. It connects to your existing Hermes setups and provides a unified dashboard for monitoring, project management, cost tracking, and automation — all accessible from Telegram.
+
+### Connect Your Existing Hermes Setup
+
+Have a Hermes bot running? Point OpenCoWork at it and instantly get the dashboard, cost tracking, briefs, and kanban board.
+
+```bash
+# Option 1: Via the interactive installer (easiest)
+cargo run -p opencowork-installer
+# → Select "Connect to existing Hermes" during setup
+
+# Option 2: Via CLI
+./target/release/opencowork-server \
+  --hermes http://your-hermes:8080 \
+  --telegram YOUR_BOT_TOKEN
+
+# Option 3: Via config file
+cat > hermes.toml << 'EOF'
+[hermes]
+endpoint = "http://your-hermes:8080"
+api_key = "optional-api-key"
+
+[telegram]
+bot_token = "YOUR_BOT_TOKEN"
+EOF
+```
+
+No migration needed. Your agents keep running as-is. OpenCoWork just wraps them with the control plane.
 
 ### Agent Control Dashboard
 
