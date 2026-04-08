@@ -384,30 +384,39 @@ Write-Host "  (This will take 5-15 minutes on first build...)" -ForegroundColor 
 Push-Location $buildDir
 $buildStart = Get-Date
 
-Start-Spinner
-Update-Spinner "Building server (this takes a while)..."
-& cargo build --release -p hypercowork-server 2>$null
+Write-Host "  Compiling crates..." -ForegroundColor Cyan
+$env:CARGO_TERM_PROGRESS_WIDTH]=60
+& cargo build --release -p hypercowork-server 2>&1 | ForEach-Object {
+    if ($_ -match "Compiling (\S+)") {
+        Write-Host "  ⟳ Compiling $($matches[1])..." -ForegroundColor DarkGray -NoNewline
+        Write-Host "`r" -NoNewline
+    }
+}
 $buildTime = [math]::Round(((Get-Date) - $buildStart).TotalSeconds, 1)
 
 if ($LASTEXITCODE -eq 0) {
-    Stop-Spinner
+    Write-Host ""
     Copy-Item "$buildDir\target\release\hypercowork-server.exe" "$InstallDir\bin\" -Force
     Write-Done "Server built in ${buildTime}s → $InstallDir\bin\hypercowork-server.exe"
 } else {
-    Stop-Spinner
+    Write-Host ""
     Write-Error "Server build failed"
 }
 
 Write-Step "Building router..."
-Start-Spinner
-Update-Spinner "Building router..."
-& cargo build --release -p hypercowork-router 2>$null
+Write-Host "  Compiling crates..." -ForegroundColor Cyan
+& cargo build --release -p hypercowork-router 2>&1 | ForEach-Object {
+    if ($_ -match "Compiling (\S+)") {
+        Write-Host "  ⟳ Compiling $($matches[1])..." -ForegroundColor DarkGray -NoNewline
+        Write-Host "`r" -NoNewline
+    }
+}
 if ($LASTEXITCODE -eq 0) {
-    Stop-Spinner
+    Write-Host ""
     Copy-Item "$buildDir\target\release\hypercowork-router.exe" "$InstallDir\bin\" -Force
     Write-Done "Router built → $InstallDir\bin\hypercowork-router.exe"
 } else {
-    Stop-Spinner
+    Write-Host ""
     Write-Error "Router build failed"
 }
 Pop-Location
