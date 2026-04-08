@@ -225,12 +225,16 @@ Write-Header "BUILD HYPERCOWORK"
 $buildDir = "$InstallDir\source"
 if (-not (Test-Path $buildDir)) {
     Write-Step "Cloning repository..."
-    & git clone 2>&1 | Out-Null
+    try {
+        & git clone https://github.com/$REPO.git $buildDir 2>`$null
+    } catch {}
     Write-Done "Cloned to $buildDir"
 } else {
     Write-Step "Updating repository..."
     Push-Location $buildDir
-    & git pull 2>&1 | Out-Null
+    try {
+        & git pull 2>`$null
+    } catch {}
     Pop-Location
     Write-Done "Updated $buildDir"
 }
@@ -270,11 +274,15 @@ if ($SkipLlama) {
 
     if (-not (Test-Path $llamaDir)) {
         Write-Step "Cloning llama.cpp..."
-        & git clone 2>&1 | Out-Null
+        try {
+            & git clone https://github.com/$LLAMA_CPP_REPO.git $llamaDir 2>`$null
+        } catch {}
     } else {
         Write-Step "Updating llama.cpp..."
         Push-Location $llamaDir
-        & git pull 2>&1 | Out-Null
+        try {
+            & git pull 2>`$null
+        } catch {}
         Pop-Location
     }
 
