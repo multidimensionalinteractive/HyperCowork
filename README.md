@@ -21,6 +21,14 @@
 | **Telegram & Slack** | Message your agent from Telegram or Slack while it works on a cloud VM. Cross-platform continuity. |
 | **Automatic knowledge graph** | Agent builds and maintains a knowledge graph of your projects, preferences, and history. |
 | **🦀 Rust-powered** | 10x faster server, 5x less RAM. Single binary, zero Node runtime. |
+| **User-Friendly Installer** | Interactive setup wizard guides you through configuration. No more config file hunting. |
+| **Social Media Automation** | Auto-post to Twitter, schedule content, generate captions from your knowledge base. |
+| **Email Automation** | Compose, send, and manage emails via Telegram commands. Never write a templated email again. |
+| **SEO Optimization** | Analyze content, suggest keywords, generate meta descriptions automatically. |
+| **Excel & Spreadsheets** | Read, write, and analyze Excel files. Generate reports from raw data with one command. |
+| **File Organization** | Automatically sort downloads, clean up folders, archive old files by date. |
+| **Disk Space Manager** | Find large files, identify duplicates, suggest cleanup candidates. Save gigabytes effortlessly. |
+| **Google Drive Sync** | Automatic backups to Google Drive. Access your files anywhere, never lose important data. |
 
 ![OpenCoWork UX Preview](screenshot-full.png)
 
@@ -46,6 +54,67 @@ The Windows installer automates:
 - ✅ PATH setup
 
 Or download `install.bat` from this repo and double-click it.
+
+### User-Friendly Setup Wizard
+
+For an interactive setup experience, use the built-in installer:
+
+```bash
+# Run the guided setup wizard
+cargo run -p opencowork-installer
+```
+
+The installer will ask you:
+
+```
+═══════════════════════════════════════════
+  Hermes Agent Installer v0.1.0
+═══════════════════════════════════════════
+
+  This wizard will help you set up your AI agent.
+  Press Ctrl+C at any time to cancel.
+
+═══════════════════════════════════════════
+  Step 1: Agent Identity
+═══════════════════════════════════════════
+
+  What would you like to call your agent?
+  › hermes
+
+═══════════════════════════════════════════
+  Step 2: Choose AI Provider
+═══════════════════════════════════════════
+
+  Select the AI provider you want to use:
+
+  [0] OpenRouter     - Unified access to 100+ models
+  [1] OpenAI         - OpenAI GPT models
+  [2] Anthropic      - Anthropic Claude models
+  [3] Local          - Run locally on your machine
+
+  › 0
+
+═══════════════════════════════════════════
+  Step 3: Choose AI Model
+═══════════════════════════════════════════
+
+  Select a model for your agent:
+
+  [0] xiaomi/mimo-v2-pro    $1.00/1M tokens
+  [1] xiaomi/mimo-v2-flash  $0.09/1M tokens
+  ...
+
+  › 1
+```
+
+The installer handles:
+- ✅ AI provider selection (OpenRouter, OpenAI, Anthropic, Local)
+- ✅ Model selection with live pricing
+- ✅ API key configuration (if needed)
+- ✅ Telegram bot setup
+- ✅ GitHub integration
+- ✅ Briefing schedule configuration
+- ✅ Config file generation
 
 ### Linux / macOS (Prerequisites)
 
@@ -256,7 +325,11 @@ opencowork-rust/
 │   ├── events/          # Event bus + SSE
 │   ├── media/           # Media handling + storage
 │   ├── delivery/        # Retry logic + error classification
-│   └── text/            # Text chunking + formatting
+│   ├── text/            # Text chunking + formatting
+│   ├── hermes/          # Hermes agent client & fleet manager
+│   ├── cost-estimator/  # Token cost tracking & estimation
+│   ├── dashboard/       # Control dashboard (inbox, kanban, briefs)
+│   └── installer/       # User-friendly setup wizard
 ├── apps/
 │   └── frontend/        # SolidJS frontend (Biome + WASM)
 │       ├── src/
@@ -511,23 +584,23 @@ OpenCoWork can serve as the **control center** for your Hermes agent fleet. Conn
   │  AGENTS                        PROJECTS          COST ESTIMATOR     │
   │  ──────────────────────────    ──────────────    ──────────────── │
   │  ┌────────────────────────┐   ┌──────────────┐   Today's Spend    │
-  │  │ ● hyperagent1          │   │ Accrued Mkts │   $2.47           │
+│  │  │ ● hyperagent1          │   │ Project Alpha │   $2.47           │
   │  │   Telegram | Running    │   │ Running      │   ━━━━━━━━━━░░░   │
   │  │   Model: MiMo-V2-Flash │   │ 3 agents    │   $0.12 / hour    │
   │  │   Tokens: 1.2M today   │   └──────────────┘                   │
   │  └────────────────────────┘   ┌──────────────┐   Token Breakdown   │
-  │  ┌────────────────────────┐   │ MDI.io      │   ┌──────────────┐  │
-  │  │ ● beta-hermes42        │   │ Planning    │   │ Input  1.1M  │  │
-  │  │   Win11 | Idle         │   │ 1 agent     │   │ Output 0.3M │  │
-  │  │   Model: Gemma-4-26B   │   └──────────────┘   │ Cache   0.8M │  │
-  │  │   Tokens: 890K today   │   ┌──────────────┐   └──────────────┘  │
-  │  └────────────────────────┘   │ Tyler Bot   │                      │
+│  │  │ ● beta-hermes42        │   │ Project Beta│   │ Input  1.1M  │  │
+│  │  │   Win11 | Idle         │   │ Planning    │   │ Output 0.3M │  │
+│  │  │   Model: Gemma-4-26B   │   │ 1 agent     │   │ Cache   0.8M │  │
+│  │  │   Tokens: 890K today   │   └──────────────┘   └──────────────┘  │
+│  │  └────────────────────────┘   ┌──────────────┐                      │
+│  │                                │ Project Gamma│                      │
   │                                │ Monitoring  │   Cost by Model      │
   │  INBOX (3 new)                │ 2 agents    │   MiMo-V2-Flash $1.23│
   │  ──────────────                └──────────────┘   Gemma-4-26B   $0.89│
   │  📬 Morning Brief - 8:02am                            │
   │  📬 Code Review Done - 9:15am                         │
-  │  📬 Tyler: Deploy needed  - 9:45am                    │
+│  │  📬 Team: Deploy needed   - 9:45am                    │
   │                                                            │
   │  TODO (5 items)                      MORNING BRIEF       │
   │  ─────────────────                   ──────────────       │
@@ -545,7 +618,7 @@ OpenCoWork can serve as the **control center** for your Hermes agent fleet. Conn
 | Feature | Description |
 |---------|-------------|
 | **Multi-Agent Monitoring** | Track all Hermes agents across servers. See status, model, token usage, and activity in real-time. |
-| **Project Management** | Group agents by project (Accrued Markets, MDI.io, Tyler Bot, etc.). Track progress per project. |
+| **Project Management** | Group agents by project (Project Alpha, Project Beta, My App, etc.). Track progress per project. |
 | **Token Cost Estimator** | Real-time token counting and cost estimation per agent, per model, per day. Set budget alerts. |
 | **Inbox** | Unified inbox for morning/evening briefs, notifications, and agent updates delivered to Telegram. |
 | **Todo List** | Kanban-style todo list synced with agent tasks. Track what needs doing, in progress, done. |
@@ -575,10 +648,10 @@ cargo run -p opencowork-router -- --config router.toml --hermes http://your-herm
      • 3 agents running          ━━━━━━━━━━━━━━━━━━━
      • Tokens: $0.12 so far     ✅ Deployed v2.4
      • 2 tasks queued           ✅ Fixed auth bug
-                                 ✅ Tyler bot updated
+                                 ✅ Deploy completed
   📬 9:15am - Code Review         
 
-  📬 9:45am - Tyler Message
+  📬 9:45am - Team Message
      "Deploy to prod?"
 ```
 
@@ -607,6 +680,200 @@ cargo run -p opencowork-router -- --config router.toml --hermes http://your-herm
   │  DAILY TOTAL:                    $0.41           │
   │  MONTHLY PROJECTION:             $12.30           │
   └─────────────────────────────────────────────────────┘
+```
+
+---
+
+## What You Can Automate ✨
+
+OpenCoWork isn't just an AI chat interface — it's a powerful automation platform. Here are real things you can do with it:
+
+### 📱 Social Media Automation
+
+**What it does:** Automatically post to Twitter/X, LinkedIn, or generate content calendars.
+
+**How it works:**
+```
+You: "Post this to Twitter: Excited to announce our new feature launch next week!"
+Agent: "Posted! Here's the preview:
+        
+        🐦 @yourhandle:
+        Excited to announce our new feature launch next week!
+        
+        [Image: feature-screenshot.png]
+        
+        Posted at 10:32am"
+```
+
+**Use cases:**
+- Schedule weekly content posts in advance
+- Generate 30 social posts from a blog article in one go
+- Create image captions using AI vision
+- Track engagement and summarize mentions
+
+### 📧 Email Automation
+
+**What it does:** Compose, send, and manage emails via Telegram. Templates, follow-ups, and bulk sends.
+
+**How it works:**
+```
+You: "Send a follow-up email to leads who haven't replied in 7 days"
+Agent: "Found 12 leads. Sending follow-ups...
+       
+       ✅ Sent to john@company.com
+       ✅ Sent to sarah@startup.io
+       ⏳ Pending: mike@enterprise.com (no valid email)
+       
+       Done! 11 emails sent."
+```
+
+**Use cases:**
+- Auto-respond to common questions with smart templates
+- Send weekly digest emails to your team
+- Follow up on cold leads automatically
+- Generate personalized outreach at scale
+
+### 📊 Excel & Spreadsheets
+
+**What it does:** Read, write, analyze, and visualize spreadsheet data.
+
+**How it works:**
+```
+You: "Analyze the Q4 sales data in sales.xlsx and create a summary"
+Agent: "Here's your Q4 Summary:
+        
+        Revenue: $847,293 (+23% vs Q3)
+        Top Region: West Coast ($312,450)
+        Best Product: Widget Pro ($234,890)
+        
+        Created: q4_summary.xlsx with charts"
+```
+
+**Use cases:**
+- Generate weekly reports from raw data
+- Create pivot tables and summaries automatically
+- Merge multiple spreadsheets into one
+- Calculate trends and growth metrics
+
+### 🔍 SEO Optimization
+
+**What it does:** Analyze your content for SEO opportunities, generate meta tags, suggest improvements.
+
+**How it works:**
+```
+You: "SEO-check this article: [paste content]"
+Agent: "SEO Analysis:
+        
+        Keywords: Found 'AI automation' (3x - good density)
+        Missing: 'productivity tools' (add 2x)
+        Meta: Too long (187 chars, aim for 155)
+        
+        Suggested meta description:
+        'Boost productivity with AI automation tools.
+         Save 10+ hours/week with these proven strategies...'
+        
+        Readability: Grade 8 (aim for Grade 6)"
+```
+
+**Use cases:**
+- Generate meta tags for all blog posts at once
+- Find keyword opportunities your competitors use
+- Create SEO-friendly article outlines
+- Check readability scores for your audience
+
+### 📁 File Organization
+
+**What it does:** Automatically sort downloads, clean folders, organize by date/type.
+
+**How it works:**
+```
+You: "Organize my Downloads folder"
+Agent: "Organizing Downloads...
+       
+       📁 Moved 47 images → ~/Downloads/Images/
+       📁 Moved 23 PDFs → ~/Downloads/Documents/
+       📁 Moved 12 installers → ~/Downloads/Software/
+       🗑️  Found 8 duplicates (total 2.3GB)
+       
+       Preview duplicates? [y/n]"
+```
+
+**Use cases:**
+- Auto-sort downloads as they come in
+- Archive files older than 90 days
+- Find and merge duplicate photos
+- Clean up desktop clutter on schedule
+
+### 💾 Disk Space Manager
+
+**What it does:** Find large files, identify space hogs, suggest cleanup candidates.
+
+**How it works:**
+```
+You: "Find what's eating my disk space"
+Agent: "Disk Analysis Complete:
+        
+        📊 Total: 450GB used / 500GB
+        
+        Largest folders:
+        • node_modules: 45GB (can rebuild with npm ci)
+        • .cache: 12GB (safe to delete)
+        • temp/: 8GB (all older than 30 days)
+        • VMs/: 67GB (old dev environments)
+        
+        💡 Suggested cleanup: 89GB reclaimable"
+```
+
+**Use cases:**
+- Weekly disk health check via Telegram
+- Find the top 20 largest files instantly
+- Identify broken symlinks and empty folders
+- Get alerts when disk is >90% full
+
+### ☁️ Google Drive Sync
+
+**What it does:** Automatic backups to Google Drive. Access files anywhere, never lose data.
+
+**How it works:**
+```
+You: "Backup my project folder to Google Drive"
+Agent: "Backing up ~/projects/...
+       
+       📁 Uploading 847 files...
+       ✅ 847 files backed up
+       
+       Backup: My Drive/projects/backup_2026-04-08
+       Size: 2.4GB
+       
+       💾 Last 5 backups stored"
+```
+
+**Use cases:**
+- Nightly backup of important folders
+- Sync meeting notes to shared Drive
+- Version snapshots before major changes
+- Share large files without email limits
+
+---
+
+## Getting Started with Automations
+
+```bash
+# Run the interactive installer
+cd opencowork-rust
+cargo run -p opencowork-installer
+
+# Configure your first automation
+# 1. Select Telegram bot token
+# 2. Choose AI provider (OpenRouter recommended)
+# 3. Enable Google Drive sync
+# 4. Set your briefing schedule
+
+# Start the server
+cargo run -p opencowork-server -- --workspace ~/my-projects
+
+# Send your first command via Telegram
+/send "Organize my downloads folder"
 ```
 
 ---

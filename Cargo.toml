@@ -9,6 +9,10 @@ members = [
     "crates/events",
     "crates/delivery",
     "crates/text",
+    "crates/hermes",
+    "crates/cost-estimator",
+    "crates/dashboard",
+    "crates/installer",
 ]
 resolver = "2"
 
@@ -21,6 +25,13 @@ license = "MIT"
 # Async runtime
 tokio = { version = "1", features = ["full"] }
 tokio-util = "0.7"
+
+# CLI
+clap = { version = "4", features = ["derive"] }
+dialoguer = "0.11"
+console = "0.15"
+indicatif = "0.17"
+dirs = "5"
 
 # HTTP server
 axum = { version = "0.8", features = ["ws", "macros"] }
