@@ -208,7 +208,7 @@ if ($SkipRust -or (Test-Command "rustc")) {
 }
 
 # ─── Build HyperCoWork ───
-Write-Header "BUILD OPENCOWORK"
+Write-Header "BUILD HYPERCOWORK"
 
 $buildDir = "$InstallDir\source"
 if (-not (Test-Path $buildDir)) {
