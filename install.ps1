@@ -504,6 +504,19 @@ $listModelsPath = "$InstallDir\List Models.bat"
 $listModels | Out-File -FilePath $listModelsPath -Encoding ASCII
 Write-Done "List Models → $listModelsPath"
 
+# Create hypercowork.bat launcher in bin (for PATH access)
+$hypercoworkBat = @"
+@echo off
+echo.
+echo   Starting HyperCoWork Server...
+echo.
+cd /d "$InstallDir\bin"
+start cmd /k "hypercowork-server.exe"
+"@
+$hypercoworkBatPath = "$InstallDir\bin\hypercowork.bat"
+$hypercoworkBat | Out-File -FilePath $hypercoworkBatPath -Encoding ASCII
+Write-Done "Created 'hypercowork' command in bin"
+
 # Open frontend batch file
 $startFrontend = @"
 @echo off
@@ -563,13 +576,18 @@ Write-Host "  │  Config:       $InstallDir\config" -ForegroundColor White
 Write-Host "  │                                                      │" -ForegroundColor DarkCyan
 Write-Host "  │  TO START THE APP:                                   │" -ForegroundColor Yellow
 Write-Host "  │                                                      │" -ForegroundColor DarkCyan
-Write-Host "  │    1. Double-click 'HyperCoWork Server' on Desktop    │" -ForegroundColor White
-Write-Host "  │       (A terminal window will open with the server)   │" -ForegroundColor DarkGray
+Write-Host "  │  OPTION 1 - Desktop Icon (Recommended)               │" -ForegroundColor White
+Write-Host "  │    • Double-click 'HyperCoWork Server' on Desktop    │" -ForegroundColor White
+Write-Host "  │      (A terminal window will open with the server)   │" -ForegroundColor DarkGray
 Write-Host "  │                                                      │" -ForegroundColor DarkCyan
-Write-Host "  │    2. Open http://localhost:3000 in your browser      │" -ForegroundColor White
+Write-Host "  │  OPTION 2 - Taskbar Icon:                            │" -ForegroundColor White
+Write-Host "  │    • Right-click 'HyperCoWork Server.lnk' on Desktop │" -ForegroundColor White
+Write-Host "  │    • Choose 'Pin to taskbar'                          │" -ForegroundColor White
 Write-Host "  │                                                      │" -ForegroundColor DarkCyan
-Write-Host "  │  Or from terminal:                                   │" -ForegroundColor Yellow
-Write-Host "  │    $InstallDir\bin\hypercowork-server.exe" -ForegroundColor White
+Write-Host "  │  OPTION 3 - Type 'hypercowork-server' anywhere       │" -ForegroundColor White
+Write-Host "  │    (Open a NEW terminal window first for PATH)        │" -ForegroundColor DarkGray
+Write-Host "  │                                                      │" -ForegroundColor DarkCyan
+Write-Host "  │  Then open: http://localhost:3000 in your browser     │" -ForegroundColor Cyan
 Write-Host "  │                                                      │" -ForegroundColor DarkCyan
 Write-Host "  │  Docs: github.com/$REPO     │" -ForegroundColor Cyan
 Write-Host "  └──────────────────────────────────────────────────────┘" -ForegroundColor DarkCyan
