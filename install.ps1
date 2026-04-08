@@ -520,6 +520,17 @@ $Shortcut.Description = "Start HyperCoWork Rust Server"
 $Shortcut.Save()
 Write-Done "Desktop shortcut created"
 
+# Ask to launch now
+Write-Host ""
+Write-Color "  Launch HyperCoWork now? (Y/n)" "Yellow"
+$response = Read-Host
+if ($response -ne "n" -and $response -ne "N") {
+    Write-Color "  Starting server..." "Cyan"
+    Start-Process $startServerPath
+    Write-Color "  Server started! Opening http://localhost:3000..." "Green"
+    Start-Process "http://localhost:3000"
+}
+
 # ─── Add to PATH ───
 Write-Header "PATH"
 
