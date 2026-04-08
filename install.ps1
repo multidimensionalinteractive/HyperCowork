@@ -2,7 +2,7 @@
 #
 # Automates full setup: Rust, llama.cpp, HyperCoWork, models
 # Run in PowerShell as Administrator:
-#   irm https://raw.githubusercontent.com/multidimensionalinteractive/hypercowork-rust/main/install.ps1 | iex
+#   irm https://raw.githubusercontent.com/multidimensionalinteractive/HyperCowork/main/install.ps1 | iex
 #
 # Or download and run:
 #   .\install.ps1
@@ -20,7 +20,7 @@ $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
 
 $VERSION = "0.1.0"
-$REPO = "multidimensionalinteractive/hypercowork-rust"
+$REPO = "multidimensionalinteractive/HyperCowork"
 $LLAMA_CPP_REPO = "ggml-org/llama.cpp"
 
 # Colors for output
