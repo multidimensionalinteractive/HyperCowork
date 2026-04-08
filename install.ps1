@@ -129,44 +129,134 @@ try {
     # Running via pipeline, skip pause
 }
 
-# Check Windows version
-$winVer = [System.Environment]::OSVersion.Version
-if ($winVer.Major -lt 10) {
-    Write-Error "Windows 10 or later required"
-    exit 1
+# ─── Auto-correct missing dependencies ───
+Write-Header "CHECKING DEPENDENCIES"
+
+function Install-Git {
+    Write-Step "Git not found - installing..."
+    $gitInstaller = "$env:TEMP\git-installer.exe"
+    try {
+        Invoke-WebRequest -Uri "https://github.com/git-for-windows/git/releases/download/v2.46.0.windows.1/Git-2.46.0-64-bit.exe" -OutFile $gitInstaller
+        Start-Process -FilePath $gitInstaller -Args "/VERYSILENT /NORESTART /NOCANCEL" -Wait
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+        Write-Done "Git installed"
+    } catch {
+        Write-Error "Failed to install Git. Download from: https://git-scm.com/download/win"
+        exit 1
+    }
 }
 
-# Check architecture
-$arch = if ([Environment]::Is64BitOperatingSystem) { "x64" } else { "x86" }
-if ($arch -eq "x86") {
-    Write-Error "64-bit Windows required"
-    exit 1
+function Install-Rust {
+    Write-Step "Rust not found - installing..."
+    $rustInstaller = "$env:TEMP\rustup-init.exe"
+    try {
+        Invoke-WebRequest -Uri "https://win.rustup.rs" -OutFile $rustInstaller
+        Start-Process -FilePath $rustInstaller -Args "-y" -Wait
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+        # Add cargo to PATH
+        $cargoPath = "$env:USERPROFILE\.cargo\bin"
+        if (Test-Path $cargoPath) {
+            $currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
+            if ($currentPath -notlike "*$cargoPath*") {
+                [Environment]::SetEnvironmentVariable("Path", "$currentPath;$cargoPath", "User")
+                $env:Path += ";$cargoPath"
+            }
+        }
+        Write-Done "Rust installed"
+    } catch {
+        Write-Error "Failed to install Rust. Download from: https://rustup.rs"
+        exit 1
+    }
 }
 
-# Check disk space (need at least 10GB)
-$drive = (Get-Item $InstallDir -ErrorAction SilentlyContinue).PSDrive.Name
-if (-not $drive) { $drive = $env:SystemDrive.TrimEnd(":") }
-$freeGB = [math]::Round((Get-PSDrive $drive).Free / 1GB, 1)
-if ($freeGB -lt 10) {
-    Write-Error "Need at least 10GB free space (have ${freeGB}GB)"
-    exit 1
+function Install-VisualStudioBuildTools {
+    Write-Step "Visual Studio Build Tools not found - installing..."
+    $vsInstaller = "$env:TEMP\vs_buildtools.exe"
+    try {
+        Invoke-WebRequest -Uri "https://aka.ms/vs/17/release/vs_buildtools.exe" -OutFile $vsInstaller
+        Start-Process -FilePath $vsInstaller -Args "--wait --quiet --norestart --nocancel --add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows10SDK.22621" -Wait
+        Write-Done "Visual Studio Build Tools installed"
+    } catch {
+        Write-Skip "VS Build Tools install failed (may already be installed)"
+    }
 }
 
-Write-Done "Windows 10+ ($arch), ${freeGB}GB free"
+function Install-Bun {
+    Write-Step "Bun not found - installing..."
+    try {
+        Invoke-WebRequest -Uri "https://bun.sh/install.ps" -OutFile "$env:TEMP\bun-install.ps1"
+        & "$env:TEMP\bun-install.ps1" -BunInstallDir "$InstallDir\bun"
+        $bunPath = "$InstallDir\bun\bun.exe"
+        if (Test-Path $bunPath) {
+            $currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
+            $bunBin = "$InstallDir\bun"
+            if ($currentPath -notlike "*$bunBin*") {
+                [Environment]::SetEnvironmentVariable("Path", "$currentPath;$bunBin", "User")
+            }
+            Write-Done "Bun installed"
+        }
+    } catch {
+        Write-Skip "Bun install failed - frontend setup may need manual intervention"
+    }
+}
 
-# Check for NVIDIA GPU
-$hasNvidia = Test-NvidiaGpu
-if ($hasNvidia) {
-    $gpuName = & nvidia-smi --query-gpu=name --format=csv,noheader 2>$null | Select-Object -First 1
-    $vramMiB = & nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits 2>$null | Select-Object -First 1
-    $vramGB = [math]::Round([int]$vramMiB / 1024, 1)
-    Write-Done "NVIDIA GPU detected: $gpuName (${vramGB}GB VRAM)"
-    if (-not $Cuda) {
-        Write-Skip "Tip: Add -Cuda flag for GPU acceleration"
+# Check and auto-install dependencies
+$needsRust = $false
+
+# Check Git
+if (-not (Test-Command "git")) {
+    Install-Git
+    # Refresh environment
+    $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+    if (-not (Test-Command "git")) {
+        Write-Error "Git installation failed. Please restart PowerShell and try again."
+        exit 1
     }
 } else {
-    Write-Skip "No NVIDIA GPU detected (CPU-only inference)"
+    Write-Done "Git detected"
 }
+
+# Check Rust
+if (-not (Test-Command "rustc")) {
+    Install-Rust
+    $needsRust = $true
+} else {
+    Write-Done "Rust detected"
+}
+
+# Check Cargo
+if (-not (Test-Command "cargo")) {
+    if (-not $needsRust) {  # Rust was missing, cargo should now be there
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+    }
+    if (-not (Test-Command "cargo")) {
+        Write-Step "Cargo not in PATH - refreshing..."
+        $cargoPath = "$env:USERPROFILE\.cargo\bin"
+        $env:Path = "$cargoPath;" + $env:Path
+    }
+}
+if (Test-Command "cargo") {
+    Write-Done "Cargo detected"
+}
+
+# Check Visual Studio Build Tools (for native Rust crates)
+if ((Test-Command "rustc") -and (Test-Command "cargo")) {
+    $vsPath = "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe"
+    if (-not (Test-Path $vsPath) -and -not (Test-Path "C:\Program Files\Microsoft Visual Studio\2022")) {
+        Install-VisualStudioBuildTools
+    } else {
+        Write-Done "Visual Studio detected"
+    }
+}
+
+# Check Bun (for frontend)
+if (-not (Test-Command "bun") -and -not (Test-Path "$InstallDir\bun\bun.exe")) {
+    Install-Bun
+} else {
+    Write-Done "Bun detected"
+}
+
+Write-Host ""
 
 # ─── Create directories ───
 Write-Header "SETUP DIRECTORIES"
