@@ -385,7 +385,7 @@ Push-Location $buildDir
 $buildStart = Get-Date
 
 Write-Host "  Compiling crates..." -ForegroundColor Cyan
-$env:CARGO_TERM_PROGRESS_WIDTH]=60
+$env:CARGO_TERM_PROGRESS_WIDTH = 60
 & cargo build --release -p hypercowork-server 2>&1 | ForEach-Object {
     if ($_ -match "Compiling (\S+)") {
         Write-Host "  ⟳ Compiling $($matches[1])..." -ForegroundColor DarkGray -NoNewline
