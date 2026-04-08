@@ -72,12 +72,10 @@ function Test-NvidiaGpu() {
 # ─── ASCII Banner ───
 function Show-Banner {
     Write-Host ""
-    Write-Host "  ██████╗ ██████╗ ███████╗███╗   ██╗ ██████╗ ██████╗ ██╗    ██╗ ██████╗ ██████╗ ██╗  ██╗" -ForegroundColor Magenta
-    Write-Host " ██╔═══██╗██╔══██╗██╔════╝████╗  ██║██╔═══██╗██╔══██╗██║    ██║██╔═══██╗██╔══██╗██║ ██╔╝" -ForegroundColor Magenta
-    Write-Host " ██║   ██║██████╔╝█████╗  ██╔██╗ ██║██║   ██║██████╔╝██║ █╗ ██║██║   ██║██████╔╝█████╔╝ " -ForegroundColor Magenta
-    Write-Host " ██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║██║   ██║██╔══██╗██║███╗██║██║   ██║██╔══██╗██╔═██╗ " -ForegroundColor Magenta
-    Write-Host " ╚██████╔╝██║     ███████╗██║ ╚████║╚██████╔╝██║  ██║╚███╔███╔╝╚██████╔╝██║  ██║██║  ██╗" -ForegroundColor Magenta
-    Write-Host "  ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝ ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝" -ForegroundColor Magenta
+    Write-Host "  ╔══════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
+    Write-Host "  ║   HYPER · AGENT · COWORK · FLEET                      ║" -ForegroundColor Cyan
+    Write-Host "  ║          CONTROL SYSTEM                               ║" -ForegroundColor Cyan
+    Write-Host "  ╚══════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "    ╔═══════════════════════════════════════════════════════╗" -ForegroundColor DarkCyan
     Write-Host "    ║  🦀 RUST-POWERED  •  ⚡ BLAZING FAST  •  🔒 PRIVATE  ║" -ForegroundColor Cyan
