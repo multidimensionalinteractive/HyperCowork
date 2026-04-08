@@ -65,57 +65,32 @@ For an interactive setup experience, use the built-in installer:
 cargo run -p opencowork-installer
 ```
 
-The installer will ask you:
+The installer gives you **two options**:
 
 ```
 ═══════════════════════════════════════════
-  Hermes Agent Installer v0.1.0
+  OpenCoWork Installer v0.1.0
 ═══════════════════════════════════════════
 
-  This wizard will help you set up your AI agent.
-  Press Ctrl+C at any time to cancel.
-
-═══════════════════════════════════════════
-  Step 1: Agent Identity
-═══════════════════════════════════════════
-
-  What would you like to call your agent?
-  › hermes
-
-═══════════════════════════════════════════
-  Step 2: Choose AI Provider
-═══════════════════════════════════════════
-
-  Select the AI provider you want to use:
-
-  [0] OpenRouter     - Unified access to 100+ models
-  [1] OpenAI         - OpenAI GPT models
-  [2] Anthropic      - Anthropic Claude models
-  [3] Local          - Run locally on your machine
-
-  › 0
-
-═══════════════════════════════════════════
-  Step 3: Choose AI Model
-═══════════════════════════════════════════
-
-  Select a model for your agent:
-
-  [0] xiaomi/mimo-v2-pro    $1.00/1M tokens
-  [1] xiaomi/mimo-v2-flash  $0.09/1M tokens
-  ...
-
-  › 1
+  [0] 🚀 Connect to existing Hermes
+      Already have a Hermes bot? Just point us at it.
+  [1] ✨ Create a new Hermes agent
+      Set up a fresh agent with a new model.
 ```
 
-The installer handles:
-- ✅ AI provider selection (OpenRouter, OpenAI, Anthropic, Local)
-- ✅ Model selection with live pricing
-- ✅ API key configuration (if needed)
-- ✅ Telegram bot setup
-- ✅ GitHub integration
-- ✅ Briefing schedule configuration
-- ✅ Config file generation
+**Option 1: Connect to Existing Hermes**
+- Auto-discovers Hermes on common ports (8080, 8081, 3000)
+- Verifies connection before saving
+- Just enter the endpoint URL if auto-discovery fails
+- No model/provider config needed — uses your existing setup
+
+**Option 2: Create New Agent**
+- Choose AI provider (OpenRouter, OpenAI, Anthropic, Local)
+- Select model with live pricing shown
+- Configure API keys, Telegram, GitHub
+- Set briefing schedule
+
+Both options generate a working `config.yaml` and save to `~/.config/opencowork/`.
 
 ### Linux / macOS (Prerequisites)
 

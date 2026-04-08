@@ -17,3 +17,5 @@ dialoguer = "0.11"
 console = "0.15"
 indicatif = "0.17"
 dirs = "5"
+
+opencowork-hermes = { path = "../hermes" }
