@@ -344,15 +344,39 @@ if (-not (Test-Path $buildDir)) {
     Write-Step "Cloning repository..."
     Start-Spinner
     Update-Spinner "Cloning HyperCowork repo..."
-    $null = git clone https://github.com/$REPO.git $buildDir *>$null 2>&1
+    $psi = New-Object System.Diagnostics.ProcessStartInfo
+    $psi.FileName = "git"
+    $psi.Arguments = "clone https://github.com/$REPO.git `"$buildDir`""
+    $psi.UseShellExecute = $false
+    $psi.RedirectStandardOutput = $true
+    $psi.RedirectStandardError = $true
+    $psi.CreateNoWindow = $true
+    $process = [System.Diagnostics.Process]::Start($psi)
+    $process.WaitForExit()
     Stop-Spinner
-    Write-Done "Cloned to $buildDir"
+    if ($process.ExitCode -eq 0) {
+        Write-Done "Cloned to $buildDir"
+    } else {
+        Write-Error "Git clone failed"
+    }
 } else {
     Write-Step "Updating repository..."
     Push-Location $buildDir
-    $null = git pull *>$null 2>&1
+    $psi = New-Object System.Diagnostics.ProcessStartInfo
+    $psi.FileName = "git"
+    $psi.Arguments = "pull"
+    $psi.UseShellExecute = $false
+    $psi.RedirectStandardOutput = $true
+    $psi.RedirectStandardError = $true
+    $psi.CreateNoWindow = $true
+    $process = [System.Diagnostics.Process]::Start($psi)
+    $process.WaitForExit()
     Pop-Location
-    Write-Done "Updated $buildDir"
+    if ($process.ExitCode -eq 0) {
+        Write-Done "Updated $buildDir"
+    } else {
+        Write-Skip "Git pull skipped"
+    }
 }
 
 Write-Step "Building server (release mode)..."
@@ -400,11 +424,30 @@ if ($SkipLlama) {
 
     if (-not (Test-Path $llamaDir)) {
         Write-Step "Cloning llama.cpp..."
-        $null = git clone https://github.com/$LLAMA_CPP_REPO.git $llamaDir *>$null 2>&1
+        Start-Spinner
+        Update-Spinner "Cloning llama.cpp repo..."
+        $psi = New-Object System.Diagnostics.ProcessStartInfo
+        $psi.FileName = "git"
+        $psi.Arguments = "clone https://github.com/$LLAMA_CPP_REPO.git `"$llamaDir`""
+        $psi.UseShellExecute = $false
+        $psi.RedirectStandardOutput = $true
+        $psi.RedirectStandardError = $true
+        $psi.CreateNoWindow = $true
+        $process = [System.Diagnostics.Process]::Start($psi)
+        $process.WaitForExit()
+        Stop-Spinner
     } else {
         Write-Step "Updating llama.cpp..."
         Push-Location $llamaDir
-        $null = git pull *>$null 2>&1
+        $psi = New-Object System.Diagnostics.ProcessStartInfo
+        $psi.FileName = "git"
+        $psi.Arguments = "pull"
+        $psi.UseShellExecute = $false
+        $psi.RedirectStandardOutput = $true
+        $psi.RedirectStandardError = $true
+        $psi.CreateNoWindow = $true
+        $process = [System.Diagnostics.Process]::Start($psi)
+        $process.WaitForExit()
         Pop-Location
     }
 
