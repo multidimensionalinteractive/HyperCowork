@@ -534,10 +534,15 @@ Write-Host "  │  Binaries:     $InstallDir\bin" -ForegroundColor White
 Write-Host "  │  Models:       $InstallDir\models" -ForegroundColor White
 Write-Host "  │  Config:       $InstallDir\config" -ForegroundColor White
 Write-Host "  │                                                      │" -ForegroundColor DarkCyan
-Write-Host "  │  Quick start:                                        │" -ForegroundColor Yellow
+Write-Host "  │  TO START THE APP:                                   │" -ForegroundColor Yellow
+Write-Host "  │                                                      │" -ForegroundColor DarkCyan
 Write-Host "  │    1. Double-click 'HyperCoWork Server' on Desktop    │" -ForegroundColor White
-Write-Host "  │    2. Run 'Start llama-server.bat' for local LLM    │" -ForegroundColor White
-Write-Host "  │    3. Open http://localhost:3000 in browser          │" -ForegroundColor White
+Write-Host "  │       (A terminal window will open with the server)   │" -ForegroundColor DarkGray
+Write-Host "  │                                                      │" -ForegroundColor DarkCyan
+Write-Host "  │    2. Open http://localhost:3000 in your browser      │" -ForegroundColor White
+Write-Host "  │                                                      │" -ForegroundColor DarkCyan
+Write-Host "  │  Or from terminal:                                   │" -ForegroundColor Yellow
+Write-Host "  │    $InstallDir\bin\hypercowork-server.exe" -ForegroundColor White
 Write-Host "  │                                                      │" -ForegroundColor DarkCyan
 Write-Host "  │  Docs: github.com/$REPO     │" -ForegroundColor Cyan
 Write-Host "  └──────────────────────────────────────────────────────┘" -ForegroundColor DarkCyan
