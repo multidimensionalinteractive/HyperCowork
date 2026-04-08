@@ -69,6 +69,28 @@ function Test-NvidiaGpu() {
     }
 }
 
+# Progress spinner for long operations
+$spinnerChars = @('⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏')
+$spinnerIndex = 0
+$spinnerActive = $false
+
+function Start-Spinner {
+    $script:spinnerActive = $true
+    $script:spinnerIndex = 0
+}
+
+function Update-Spinner($Text) {
+    if ($script:spinnerActive) {
+        Write-Host "`r  $($spinnerChars[$script:spinnerIndex]) $Text" -ForegroundColor Cyan -NoNewline
+        $script:spinnerIndex = ($script:spinnerIndex + 1) % $spinnerChars.Length
+    }
+}
+
+function Stop-Spinner {
+    $script:spinnerActive = $false
+    Write-Host ""
+}
+
 # ─── ASCII Banner ───
 function Show-Banner {
     Write-Host ""
@@ -173,11 +195,16 @@ function Install-VisualStudioBuildTools {
     Write-Step "Visual Studio Build Tools not found - installing..."
     $vsInstaller = "$env:TEMP\vs_buildtools.exe"
     try {
-        Invoke-WebRequest -Uri "https://aka.ms/vs/17/release/vs_buildtools.exe" -OutFile $vsInstaller
+        Start-Spinner
+        Update-Spinner "Downloading VS Build Tools (this may take a few minutes)..."
+        Invoke-WebRequest -Uri "https://aka.ms/vs/17/release/vs_buildtools.exe" -OutFile $vsInstaller -TimeoutSec 300
+        Update-Spinner "Installing VS Build Tools..."
         Start-Process -FilePath $vsInstaller -Args "--wait --quiet --norestart --nocancel --add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows10SDK.22621" -Wait
+        Stop-Spinner
         Write-Done "Visual Studio Build Tools installed"
     } catch {
-        Write-Skip "VS Build Tools install failed (may already be installed)"
+        Stop-Spinner
+        Write-Skip "VS Build Tools skipped (will use Rust's built-in toolchain)"
     }
 }
 
@@ -315,7 +342,10 @@ Write-Header "BUILD HYPERCOWORK"
 $buildDir = "$InstallDir\source"
 if (-not (Test-Path $buildDir)) {
     Write-Step "Cloning repository..."
+    Start-Spinner
+    Update-Spinner "Cloning HyperCowork repo..."
     $null = git clone https://github.com/$REPO.git $buildDir *>$null 2>&1
+    Stop-Spinner
     Write-Done "Cloned to $buildDir"
 } else {
     Write-Step "Updating repository..."
@@ -326,24 +356,34 @@ if (-not (Test-Path $buildDir)) {
 }
 
 Write-Step "Building server (release mode)..."
+Write-Host "  (This will take 5-15 minutes on first build...)" -ForegroundColor DarkGray
 Push-Location $buildDir
 $buildStart = Get-Date
+
+Start-Spinner
+Update-Spinner "Building server (this takes a while)..."
 & cargo build --release -p hypercowork-server 2>$null
 $buildTime = [math]::Round(((Get-Date) - $buildStart).TotalSeconds, 1)
 
 if ($LASTEXITCODE -eq 0) {
+    Stop-Spinner
     Copy-Item "$buildDir\target\release\hypercowork-server.exe" "$InstallDir\bin\" -Force
     Write-Done "Server built in ${buildTime}s → $InstallDir\bin\hypercowork-server.exe"
 } else {
+    Stop-Spinner
     Write-Error "Server build failed"
 }
 
 Write-Step "Building router..."
+Start-Spinner
+Update-Spinner "Building router..."
 & cargo build --release -p hypercowork-router 2>$null
 if ($LASTEXITCODE -eq 0) {
+    Stop-Spinner
     Copy-Item "$buildDir\target\release\hypercowork-router.exe" "$InstallDir\bin\" -Force
     Write-Done "Router built → $InstallDir\bin\hypercowork-router.exe"
 } else {
+    Stop-Spinner
     Write-Error "Router build failed"
 }
 Pop-Location
