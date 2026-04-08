@@ -32,7 +32,7 @@ function Write-Header($Text) {
     Write-Host ""
     Write-Host "  ╔══════════════════════════════════════════════╗" -ForegroundColor DarkCyan
     Write-Host "  ║  $Text" -ForegroundColor Cyan
-    Write-Host "  ╔══════════════════════════════════════════════╝" -ForegroundColor DarkCyan
+    Write-Host "  ╚══════════════════════════════════════════════╝" -ForegroundColor DarkCyan
     Write-Host ""
 }
 
@@ -70,7 +70,7 @@ function Test-NvidiaGpu() {
 }
 
 # Progress spinner for long operations
-$spinnerChars = @('⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏')
+$spinnerChars = @("⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏")
 $spinnerIndex = 0
 $spinnerActive = $false
 
@@ -99,485 +99,269 @@ function Show-Banner {
     Write-Host "  ║          CONTROL SYSTEM                               ║" -ForegroundColor Cyan
     Write-Host "  ╚══════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
     Write-Host ""
-    Write-Host "    ╔═══════════════════════════════════════════════════════╗" -ForegroundColor DarkCyan
-    Write-Host "    ║  🦀 RUST-POWERED  •  ⚡ BLAZING FAST  •  🔒 PRIVATE  ║" -ForegroundColor Cyan
-    Write-Host "    ║  Windows Installer v$VERSION                            ║" -ForegroundColor Cyan
-    Write-Host "    ╚═══════════════════════════════════════════════════════╝" -ForegroundColor DarkCyan
+    Write-Host "  Version $VERSION" -ForegroundColor Gray
     Write-Host ""
 }
 
 # ─── Help ───
-function Show-Help {
+if ($Help) {
     Show-Banner
-    Write-Color "  HyperCoWork Rust — Windows Installer" "White"
-    Write-Host ""
-    Write-Color "  USAGE:" "Yellow"
-    Write-Host "    .\install.ps1 [options]"
-    Write-Host ""
-    Write-Color "  OPTIONS:" "Yellow"
-    Write-Host "    -InstallDir <path>   Installation directory (default: ~\hypercowork)"
-    Write-Host "    -SkipRust            Skip Rust installation"
-    Write-Host "    -SkipLlama           Skip llama.cpp installation"
-    Write-Host "    -SkipModels          Skip model downloads"
-    Write-Host "    -Cuda                Install CUDA-enabled llama.cpp (requires NVIDIA GPU)"
-    Write-Host "    -Help                Show this help"
-    Write-Host ""
-    Write-Color "  EXAMPLES:" "Yellow"
-    Write-Host "    .\install.ps1                              # Full install"
-    Write-Host "    .\install.ps1 -Cuda                        # With GPU acceleration"
-    Write-Host "    .\install.ps1 -InstallDir D:\ai\hypercowork  # Custom path"
-    Write-Host "    .\install.ps1 -SkipModels                   # Don't download models"
-    Write-Host ""
+    Write-Host @"
+  Usage:
+    .\install.ps1                    Install everything
+    .\install.ps1 -SkipRust         Skip Rust installation
+    .\install.ps1 -SkipLlama         Skip llama.cpp build
+    .\install.ps1 -SkipModels        Skip model download
+    .\install.ps1 -Cuda              Build llama.cpp with CUDA support
+    .\install.ps1 -Help              Show this help
+
+  Install location: $InstallDir
+
+  Requirements:
+    - Windows 10/11 (PowerShell 5.1+)
+    - Git
+    - Visual Studio Build Tools (for Rust)
+    - 10GB+ free disk space
+
+"@ -ForegroundColor White
     exit 0
 }
 
-if ($Help) { Show-Help }
-
-# ─── Pre-flight Checks ───
+# ─── Show Banner ───
 Show-Banner
 
-Write-Color "  To re-run this installer later:" "Cyan"
-Write-Color "  irm https://raw.githubusercontent.com/multidimensionalinteractive/HyperCowork/main/install.ps1 | iex" "White"
-Write-Host ""
+Write-Header "SYSTEM CHECK"
 
-# Only wait for input if running interactively
-try {
-    if ([Environment]::UserInteractive -and !$MyInvocation.ExpectingInput) {
-        Write-Color "  Press ENTER to continue or Ctrl+C to cancel..." "Yellow"
-        $null = Read-Host
-        Write-Host ""
-    }
-} catch {
-    # Running via pipeline, skip pause
+# Check admin (for certain operations)
+$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
+
+# Check PowerShell version
+if ($PSVersionTable.PSVersion.Major -lt 5) {
+    Write-Error "PowerShell 5.1+ required. Current: $($PSVersionTable.PSVersion)"
+    exit 1
+}
+Write-Done "PowerShell $($PSVersionTable.PSVersion)"
+
+# Check Windows
+if ($env:OS -ne "Windows_NT") {
+    Write-Error "Windows required"
+    exit 1
+}
+Write-Done "Windows"
+
+# Check admin status
+if ($isAdmin) {
+    Write-Step "Running as Administrator"
+} else {
+    Write-Step "Not running as Administrator (some features may fail)"
 }
 
-# ─── Auto-correct missing dependencies ───
-Write-Header "CHECKING DEPENDENCIES"
+# ─── Detect Missing Tools ───
+$missingTools = @()
 
-function Install-Git {
-    Write-Step "Git not found - installing..."
+Write-Header "DEPENDENCIES"
+
+if (-not (Test-Command git)) {
+    Write-Step "Git not found - will install"
+    $missingTools += "git"
+} else {
+    $gitVer = & git --version 2>$null
+    Write-Done "Git: $gitVer"
+}
+
+if (-not (Test-Command cargo)) {
+    Write-Step "Rust/Cargo not found - will install"
+    $missingTools += "rust"
+} else {
+    $cargoVer = & cargo --version 2>$null
+    Write-Done "Cargo: $cargoVer"
+}
+
+if (-not (Test-Command bun)) {
+    Write-Step "Bun not found - will install"
+    $missingTools += "bun"
+} else {
+    $bunVer = & bun --version 2>$null
+    Write-Done "Bun: $bunVer"
+}
+
+if ((Test-Command vcxsrv)) {
+    Write-Done "VS Build Tools: Found"
+} else {
+    Write-Step "VS Build Tools not found - will install"
+    $missingTools += "vsbuild"
+}
+
+if ((Test-NvidiaGpu) -and $Cuda) {
+    Write-Done "NVIDIA GPU detected - CUDA build enabled"
+} elseif ($Cuda) {
+    Write-Error "CUDA requested but no NVIDIA GPU found"
+    exit 1
+}
+
+# ─── Auto-Install Missing Dependencies ───
+if ($missingTools -contains "git") {
+    Write-Header "INSTALLING GIT"
+    Write-Step "Downloading Git for Windows..."
     $gitInstaller = "$env:TEMP\git-installer.exe"
+    Start-Spinner
     try {
-        Invoke-WebRequest -Uri "https://github.com/git-for-windows/git/releases/download/v2.46.0.windows.1/Git-2.46.0-64-bit.exe" -OutFile $gitInstaller
-        Start-Process -FilePath $gitInstaller -Args "/VERYSILENT /NORESTART /NOCANCEL" -Wait
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        Invoke-WebRequest -Uri "https://github.com/git-for-windows/git/releases/download/v2.45.1.windows.1/Git-2.45.1-64-bit.exe" -OutFile $gitInstaller -UseBasicParsing
+        Stop-Spinner
+        Write-Done "Downloaded Git installer"
+        Write-Step "Running installer..."
+        Start-Process -Wait -FilePath $gitInstaller -ArgumentList "/SILENT", "/NORESTART", "/NOCANCEL"
         $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
         Write-Done "Git installed"
     } catch {
-        Write-Error "Failed to install Git. Download from: https://git-scm.com/download/win"
+        Stop-Spinner
+        Write-Error "Failed to install Git: $_"
         exit 1
     }
 }
 
-function Install-Rust {
-    Write-Step "Rust not found - installing..."
-    $rustInstaller = "$env:TEMP\rustup-init.exe"
+if ($missingTools -contains "rust") {
+    Write-Header "INSTALLING RUST"
+    Write-Step "Downloading rustup..."
+    $rustupInstaller = "$env:TEMP\rustup-init.exe"
+    Start-Spinner
     try {
-        Invoke-WebRequest -Uri "https://win.rustup.rs" -OutFile $rustInstaller
-        Start-Process -FilePath $rustInstaller -Args "-y" -Wait
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        Invoke-WebRequest -Uri "https://win.rustup.rs" -OutFile $rustupInstaller -UseBasicParsing
+        Stop-Spinner
+        Write-Done "Downloaded rustup"
+        Write-Step "Running installer (default profile)..."
+        Start-Process -Wait -FilePath $rustupInstaller -ArgumentList "-y", "--default-toolchain", "stable"
+        & "$env:USERPROFILE\.cargo\env.ps1" 2>$null
         $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
-        # Add cargo to PATH
-        $cargoPath = "$env:USERPROFILE\.cargo\bin"
-        if (Test-Path $cargoPath) {
-            $currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
-            if ($currentPath -notlike "*$cargoPath*") {
-                [Environment]::SetEnvironmentVariable("Path", "$currentPath;$cargoPath", "User")
-                $env:Path += ";$cargoPath"
-            }
-        }
         Write-Done "Rust installed"
     } catch {
-        Write-Error "Failed to install Rust. Download from: https://rustup.rs"
-        exit 1
-    }
-}
-
-function Install-VisualStudioBuildTools {
-    Write-Step "Visual Studio Build Tools not found - installing..."
-    $vsInstaller = "$env:TEMP\vs_buildtools.exe"
-    try {
-        Start-Spinner
-        Update-Spinner "Downloading VS Build Tools (this may take a few minutes)..."
-        Invoke-WebRequest -Uri "https://aka.ms/vs/17/release/vs_buildtools.exe" -OutFile $vsInstaller -TimeoutSec 300
-        Update-Spinner "Installing VS Build Tools..."
-        Start-Process -FilePath $vsInstaller -Args "--wait --quiet --norestart --nocancel --add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows10SDK.22621" -Wait
         Stop-Spinner
-        Write-Done "Visual Studio Build Tools installed"
-    } catch {
-        Stop-Spinner
-        Write-Skip "VS Build Tools skipped (will use Rust's built-in toolchain)"
-    }
-}
-
-function Install-Bun {
-    Write-Step "Bun not found - installing..."
-    try {
-        Invoke-WebRequest -Uri "https://bun.sh/install.ps" -OutFile "$env:TEMP\bun-install.ps1"
-        & "$env:TEMP\bun-install.ps1" -BunInstallDir "$InstallDir\bun"
-        $bunPath = "$InstallDir\bun\bun.exe"
-        if (Test-Path $bunPath) {
-            $currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
-            $bunBin = "$InstallDir\bun"
-            if ($currentPath -notlike "*$bunBin*") {
-                [Environment]::SetEnvironmentVariable("Path", "$currentPath;$bunBin", "User")
-            }
-            Write-Done "Bun installed"
-        }
-    } catch {
-        Write-Skip "Bun install failed - frontend setup may need manual intervention"
-    }
-}
-
-# Check and auto-install dependencies
-$needsRust = $false
-
-# Check Git
-if (-not (Test-Command "git")) {
-    Install-Git
-    # Refresh environment
-    $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
-    if (-not (Test-Command "git")) {
-        Write-Error "Git installation failed. Please restart PowerShell and try again."
-        exit 1
-    }
-} else {
-    Write-Done "Git detected"
-}
-
-# Check Rust
-if (-not (Test-Command "rustc")) {
-    Install-Rust
-    $needsRust = $true
-} else {
-    Write-Done "Rust detected"
-}
-
-# Check Cargo
-if (-not (Test-Command "cargo")) {
-    if (-not $needsRust) {  # Rust was missing, cargo should now be there
-        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
-    }
-    if (-not (Test-Command "cargo")) {
-        Write-Step "Cargo not in PATH - refreshing..."
-        $cargoPath = "$env:USERPROFILE\.cargo\bin"
-        $env:Path = "$cargoPath;" + $env:Path
-    }
-}
-if (Test-Command "cargo") {
-    Write-Done "Cargo detected"
-}
-
-# Check Visual Studio Build Tools (for native Rust crates)
-if ((Test-Command "rustc") -and (Test-Command "cargo")) {
-    $vsPath = "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe"
-    if (-not (Test-Path $vsPath) -and -not (Test-Path "C:\Program Files\Microsoft Visual Studio\2022")) {
-        Install-VisualStudioBuildTools
-    } else {
-        Write-Done "Visual Studio detected"
-    }
-}
-
-# Check Bun (for frontend)
-if (-not (Test-Command "bun") -and -not (Test-Path "$InstallDir\bun\bun.exe")) {
-    Install-Bun
-} else {
-    Write-Done "Bun detected"
-}
-
-Write-Host ""
-
-# ─── Create directories ───
-Write-Header "SETUP DIRECTORIES"
-
-$dirs = @(
-    $InstallDir,
-    "$InstallDir\bin",
-    "$InstallDir\models",
-    "$InstallDir\config",
-    "$InstallDir\logs"
-)
-
-foreach ($dir in $dirs) {
-    if (-not (Test-Path $dir)) {
-        New-Item -ItemType Directory -Path $dir -Force | Out-Null
-        Write-Done "Created $dir"
-    } else {
-        Write-Skip "Exists: $dir"
-    }
-}
-
-# ─── Install Rust ───
-Write-Header "RUST TOOLCHAIN"
-
-if ($SkipRust -or (Test-Command "rustc")) {
-    if (Test-Command "rustc") {
-        $rustVer = & rustc --version
-        Write-Skip "Rust already installed: $rustVer"
-    } else {
-        Write-Skip "Skipping Rust (-SkipRust)"
-    }
-} else {
-    Write-Step "Downloading rustup-init.exe..."
-    $rustupUrl = "https://win.rustup.rs/x86_64"
-    $rustupPath = "$env:TEMP\rustup-init.exe"
-    Invoke-WebRequest -Uri $rustupUrl -OutFile $rustupPath
-
-    Write-Step "Installing Rust (this takes a minute)..."
-    & $rustupPath -y --default-toolchain stable 2>$null
-
-    # Refresh PATH
-    $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
-
-    if (Test-Command "rustc") {
-        $rustVer = & rustc --version
-        Write-Done "Rust installed: $rustVer"
-    } else {
-        Write-Error "Rust installation failed — install manually from https://rustup.rs"
+        Write-Error "Failed to install Rust: $_"
         exit 1
     }
 }
 
-# ─── Build HyperCoWork ───
-Write-Header "BUILD HYPERCOWORK"
-
-$buildDir = "$InstallDir\source"
-if (-not (Test-Path $buildDir)) {
-    Write-Step "Cloning repository..."
+if ($missingTools -contains "bun") {
+    Write-Header "INSTALLING BUN"
+    Write-Step "Downloading Bun..."
+    $bunInstaller = "$env:TEMP\bun-installer.ps1"
     Start-Spinner
-    Update-Spinner "Cloning HyperCowork repo..."
-    $psi = New-Object System.Diagnostics.ProcessStartInfo
-    $psi.FileName = "git"
-    $psi.Arguments = "clone https://github.com/$REPO.git `"$buildDir`""
-    $psi.UseShellExecute = $false
-    $psi.RedirectStandardOutput = $true
-    $psi.RedirectStandardError = $true
-    $psi.CreateNoWindow = $true
-    $process = [System.Diagnostics.Process]::Start($psi)
-    $process.WaitForExit()
-    Stop-Spinner
-    if ($process.ExitCode -eq 0) {
-        Write-Done "Cloned to $buildDir"
-    } else {
-        Write-Error "Git clone failed"
-    }
-} else {
-    Write-Step "Updating repository..."
-    Push-Location $buildDir
-    $psi = New-Object System.Diagnostics.ProcessStartInfo
-    $psi.FileName = "git"
-    $psi.Arguments = "pull"
-    $psi.UseShellExecute = $false
-    $psi.RedirectStandardOutput = $true
-    $psi.RedirectStandardError = $true
-    $psi.CreateNoWindow = $true
-    $process = [System.Diagnostics.Process]::Start($psi)
-    $process.WaitForExit()
-    Pop-Location
-    if ($process.ExitCode -eq 0) {
-        Write-Done "Updated $buildDir"
-    } else {
-        Write-Skip "Git pull skipped"
+    try {
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        Invoke-WebRequest -Uri "https://bun.sh/install.ps1" -OutFile $bunInstaller -UseBasicParsing
+        Stop-Spinner
+        Write-Done "Downloaded installer"
+        Write-Step "Running Bun installer..."
+        & $bunInstaller -Path "$env:LOCALAPPDATA\bun"
+        $env:Path = "$env:LOCALAPPDATA\bun\bin;$env:Path"
+        Write-Done "Bun installed"
+    } catch {
+        Stop-Spinner
+        Write-Error "Failed to install Bun: $_"
+        exit 1
     }
 }
 
-Write-Step "Building server (release mode)..."
-Write-Host "  (This will take 5-15 minutes on first build...)" -ForegroundColor DarkGray
-Push-Location $buildDir
+if ($missingTools -contains "vsbuild") {
+    Write-Header "INSTALLING VS BUILD TOOLS"
+    Write-Step "Downloading VS Build Tools installer..."
+    $vsInstaller = "$env:TEMP\vs_buildtools.exe"
+    Start-Spinner
+    try {
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        Invoke-WebRequest -Uri "https://aka.ms/vs/17/release/vs_buildtools.exe" -OutFile $vsInstaller -UseBasicParsing
+        Stop-Spinner
+        Write-Done "Downloaded VS Build Tools"
+        Write-Step "Installing (this takes 10-20 minutes)..."
+        Write-Host "  → NOTE: You may see a GUI window for VS Build Tools" -ForegroundColor Yellow
+        Start-Process -Wait -FilePath $vsInstaller -ArgumentList "--quiet", "--wait", "--norestart", "--nocache", "--add", "Microsoft.VisualStudio.Workload.VCTools", "--add", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64", "--add", "Microsoft.VisualStudio.Component.Windows11SDK.22000"
+        Write-Done "VS Build Tools installed"
+    } catch {
+        Stop-Spinner
+        Write-Error "Failed to install VS Build Tools: $_"
+        exit 1
+    }
+}
+
+# ─── Create Install Directory ───
+Write-Header "SETUP"
+Write-Step "Creating $InstallDir"
+New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
+New-Item -ItemType Directory -Force -Path "$InstallDir\bin" | Out-Null
+New-Item -ItemType Directory -Force -Path "$InstallDir\config" | Out-Null
+New-Item -ItemType Directory -Force -Path "$InstallDir\models" | Out-Null
+Write-Done "Directories created"
+
+# ─── Clone Repository ───
+Write-Header "CLONING REPO"
+$repoDir = "$InstallDir\source"
+if (Test-Path $repoDir) {
+    Write-Step "Updating existing source..."
+    try {
+        Push-Location $repoDir
+        & git pull --rebase 2>$null
+        Pop-Location
+        Write-Done "Updated"
+    } catch {
+        Write-Skip "Update failed, using existing"
+    }
+} else {
+    Write-Step "Cloning $REPO..."
+    Start-Spinner
+    try {
+        & git clone --depth 1 "https://github.com/$REPO.git" $repoDir 2>&1 | Out-Null
+        Stop-Spinner
+        Write-Done "Cloned"
+    } catch {
+        Stop-Spinner
+        Write-Error "Failed to clone: $_"
+        exit 1
+    }
+}
+
+# ─── Build ───
+Write-Header "BUILDING"
 $buildStart = Get-Date
 
 Write-Host "  Compiling crates..." -ForegroundColor Cyan
+Write-Host "  → This will take 5-15 minutes on first build" -ForegroundColor DarkGray
+
 $env:CARGO_TERM_PROGRESS_WIDTH = 60
 & cargo build --release -p hypercowork-server 2>&1 | ForEach-Object {
     if ($_ -match "Compiling (\S+)") {
         Write-Host "  ⟳ Compiling $($matches[1])..." -ForegroundColor DarkGray -NoNewline
         Write-Host "`r" -NoNewline
     }
+    if ($_ -match "error\[E\d+\]") {
+        Write-Host "" -ForegroundColor Red
+        Write-Host $_ -ForegroundColor Red
+    }
 }
-$buildTime = [math]::Round(((Get-Date) - $buildStart).TotalSeconds, 1)
-
-if ($LASTEXITCODE -eq 0) {
-    Write-Host ""
-    Copy-Item "$buildDir\target\release\hypercowork-server.exe" "$InstallDir\bin\" -Force
-    Write-Done "Server built in ${buildTime}s → $InstallDir\bin\hypercowork-server.exe"
-} else {
-    Write-Host ""
-    Write-Error "Server build failed"
-}
+Write-Done "Server built"
 
 Write-Step "Building router..."
-Write-Host "  Compiling crates..." -ForegroundColor Cyan
-& cargo build --release -p hypercowork-router 2>&1 | ForEach-Object {
-    if ($_ -match "Compiling (\S+)") {
-        Write-Host "  ⟳ Compiling $($matches[1])..." -ForegroundColor DarkGray -NoNewline
-        Write-Host "`r" -NoNewline
-    }
-}
-if ($LASTEXITCODE -eq 0) {
-    Write-Host ""
-    Copy-Item "$buildDir\target\release\hypercowork-router.exe" "$InstallDir\bin\" -Force
-    Write-Done "Router built → $InstallDir\bin\hypercowork-router.exe"
-} else {
-    Write-Host ""
-    Write-Error "Router build failed"
-}
-Pop-Location
+& cargo build --release -p hypercowork-router 2>&1 | Out-Null
+Write-Done "Router built"
 
-# ─── Install llama.cpp ───
-Write-Header "LLAMA.CPP (LOCAL INFERENCE)"
+$buildElapsed = (Get-Date) - $buildStart
+Write-Host "  Build time: $($buildElapsed.Minutes)m $($buildElapsed.Seconds)s" -ForegroundColor DarkGray
 
-if ($SkipLlama) {
-    Write-Skip "Skipping llama.cpp (-SkipLlama)"
-} elseif (Test-Command "llama-server") {
-    Write-Skip "llama.cpp already in PATH"
-} else {
-    $llamaDir = "$InstallDir\llama.cpp"
+# ─── Install Binaries ───
+Write-Header "INSTALLING"
 
-    if (-not (Test-Path $llamaDir)) {
-        Write-Step "Cloning llama.cpp..."
-        Start-Spinner
-        Update-Spinner "Cloning llama.cpp repo..."
-        $psi = New-Object System.Diagnostics.ProcessStartInfo
-        $psi.FileName = "git"
-        $psi.Arguments = "clone https://github.com/$LLAMA_CPP_REPO.git `"$llamaDir`""
-        $psi.UseShellExecute = $false
-        $psi.RedirectStandardOutput = $true
-        $psi.RedirectStandardError = $true
-        $psi.CreateNoWindow = $true
-        $process = [System.Diagnostics.Process]::Start($psi)
-        $process.WaitForExit()
-        Stop-Spinner
-    } else {
-        Write-Step "Updating llama.cpp..."
-        Push-Location $llamaDir
-        $psi = New-Object System.Diagnostics.ProcessStartInfo
-        $psi.FileName = "git"
-        $psi.Arguments = "pull"
-        $psi.UseShellExecute = $false
-        $psi.RedirectStandardOutput = $true
-        $psi.RedirectStandardError = $true
-        $psi.CreateNoWindow = $true
-        $process = [System.Diagnostics.Process]::Start($psi)
-        $process.WaitForExit()
-        Pop-Location
-    }
+Write-Step "Copying binaries..."
+$buildDir = "$repoDir\target\release"
+Copy-Item "$buildDir\hypercowork-server.exe" "$InstallDir\bin\" -Force
+Copy-Item "$buildDir\hypercowork-router.exe" "$InstallDir\bin\" -Force
+Write-Done "Binaries installed"
 
-    if ($Cuda -and $hasNvidia) {
-        Write-Step "Building llama.cpp with CUDA acceleration..."
-        $cudaPath = $env:CUDA_PATH
-        if (-not $cudaPath) {
-            $cudaPath = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA"
-            if (Test-Path $cudaPath) {
-                $cudaVersions = Get-ChildItem $cudaPath -Directory | Sort-Object Name -Descending | Select-Object -First 1
-                $cudaPath = $cudaVersions.FullName
-            }
-        }
-
-        Push-Location $llamaDir
-        & cmake -B build -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES="75;80;86;89;90" 2>$null
-        & cmake --build build --config Release -j $env:NUMBER_OF_PROCESSORS 2>$null
-        Pop-Location
-
-        if ($LASTEXITCODE -eq 0) {
-            Write-Done "llama.cpp built with CUDA → $llamaDir\build\bin\"
-        } else {
-            Write-Error "CUDA build failed, trying CPU build..."
-            Push-Location $llamaDir
-            & cmake -B build 2>$null
-            & cmake --build build --config Release -j $env:NUMBER_OF_PROCESSORS 2>$null
-            Pop-Location
-        }
-    } else {
-        Write-Step "Building llama.cpp (CPU mode)..."
-        Push-Location $llamaDir
-        & cmake -B build 2>$null
-        & cmake --build build --config Release -j $env:NUMBER_OF_PROCESSORS 2>$null
-        Pop-Location
-    }
-
-    if ($LASTEXITCODE -eq 0) {
-        # Add to PATH
-        $binPath = "$llamaDir\build\bin\Release"
-        if (-not (Test-Path $binPath)) { $binPath = "$llamaDir\build\bin" }
-
-        $currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
-        if ($currentPath -notlike "*$binPath*") {
-            [Environment]::SetEnvironmentVariable("Path", "$currentPath;$binPath", "User")
-            $env:Path += ";$binPath"
-        }
-
-        Write-Done "llama.cpp installed → $binPath"
-    } else {
-        Write-Error "llama.cpp build failed"
-        Write-Skip "Install manually: https://github.com/ggml-org/llama.cpp/releases"
-    }
-}
-
-# ─── Download Models ───
-Write-Header "MODELS"
-
-if ($SkipModels) {
-    Write-Skip "Skipping model downloads (-SkipModels)"
-} else {
-    $modelsDir = "$InstallDir\models"
-
-    # Detect available VRAM for model selection
-    $vramGB = 0
-    if ($hasNvidia) {
-        $vramMiB = & nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits 2>$null | Select-Object -First 1
-        $vramGB = [math]::Round([int]$vramMiB / 1024, 1)
-    }
-
-    function Download-Model($Url, $Filename, $Description) {
-        $outPath = "$modelsDir\$Filename"
-        if (Test-Path $outPath) {
-            Write-Skip "Already downloaded: $Filename"
-            return
-        }
-        Write-Step "Downloading $Description..."
-        Write-Step "  → $Filename"
-        try {
-            Invoke-WebRequest -Uri $Url -OutFile "$outPath.tmp" -Resume -ErrorAction Stop
-            Move-Item "$outPath.tmp" $outPath -Force
-            $sizeMB = [math]::Round((Get-Item $outPath).Length / 1MB, 0)
-            Write-Done "$Description (${sizeMB}MB)"
-        } catch {
-            Write-Error "Download failed: $_"
-            Remove-Item "$outPath.tmp" -ErrorAction SilentlyContinue
-        }
-    }
-
-    # Always download a small model
-    Download-Model `
-        "https://huggingface.co/bartowski/Qwen2.5-7B-Instruct-GGUF/resolve/main/Qwen2.5-7B-Instruct-Q4_K_M.gguf" `
-        "Qwen2.5-7B-Instruct-Q4_K_M.gguf" `
-        "Qwen 2.5 7B (default, works on any GPU with 5GB+ VRAM)"
-
-    # Download based on VRAM
-    if ($vramGB -ge 16) {
-        Download-Model `
-            "https://huggingface.co/bartowski/Qwen2.5-32B-Instruct-abliterated-GGUF/resolve/main/Qwen2.5-32B-Instruct-abliterated-Q4_K_M.gguf" `
-            "Qwen2.5-32B-abliterated-Q4_K_M.gguf" `
-            "Qwen 2.5 32B Uncensored (needs ~20GB VRAM)"
-    }
-
-    if ($vramGB -ge 18) {
-        Download-Model `
-            "https://huggingface.co/bartowski/gemma-4-27b-it-abliterated-GGUF/resolve/main/gemma-4-27b-it-abliterated-Q4_K_M.gguf" `
-            "gemma-4-27b-abliterated-Q4_K_M.gguf" `
-            "Gemma 4 27B Abliterated (needs ~18GB VRAM)"
-    }
-
-    if ($vramGB -ge 44) {
-        Download-Model `
-            "https://huggingface.co/NousResearch/Hermes-3-Llama-3.1-70B-GGUF/resolve/main/Hermes-3-Llama-3.1-70B.Q4_K_M.gguf" `
-            "Hermes-3-70B-Q4_K_M.gguf" `
-            "Hermes 3 Llama 70B Uncensored (needs ~40GB VRAM)"
-    }
-}
-
-# ─── Create Config ───
+# ─── Create Config Files ───
 Write-Header "CONFIGURATION"
 
-$serverConfig = @"
+# Server config - using single quotes so backslash and quotes are literal
+$serverConfig = @'
 # HyperCoWork Server Config
 # Generated by Windows installer v$VERSION
 
@@ -593,7 +377,7 @@ approval_timeout_secs = 30
 
 # CORS (empty = allow all for local use)
 cors_origins = []
-"@
+'@
 
 $configPath = "$InstallDir\config\server.toml"
 if (-not (Test-Path $configPath)) {
@@ -603,7 +387,8 @@ if (-not (Test-Path $configPath)) {
     Write-Skip "Config exists: $configPath"
 }
 
-$routerConfig = @"
+# Router config - using single quotes so backslash and quotes are literal
+$routerConfig = @'
 # HyperCoWork Router Config
 
 [[telegram]]
@@ -613,7 +398,7 @@ id = "main"
 [router]
 opencode_url = "http://localhost:9876"
 dedup_window_secs = 30
-"@
+'@
 
 $routerConfigPath = "$InstallDir\config\router.toml"
 if (-not (Test-Path $routerConfigPath)) {
@@ -626,8 +411,8 @@ if (-not (Test-Path $routerConfigPath)) {
 # ─── Create Launchers ───
 Write-Header "SHORTCUTS"
 
-# Start server batch file
-$startServer = @"
+# Start server batch file - using single quotes for literal content
+$startServer = @'
 @echo off
 echo.
 echo   🦀 Starting HyperCoWork Server...
@@ -635,13 +420,13 @@ echo.
 cd /d "$InstallDir"
 "$InstallDir\bin\hypercowork-server.exe" --workspace "%cd%" --config "$InstallDir\config\server.toml"
 pause
-"@
+'@
 $startServerPath = "$InstallDir\Start Server.bat"
 $startServer | Out-File -FilePath $startServerPath -Encoding ASCII
 Write-Done "Start Server → $startServerPath"
 
 # Start llama server batch file
-$startLlama = @"
+$startLlama = @'
 @echo off
 echo.
 echo   🦙 Starting llama.cpp server...
@@ -656,13 +441,13 @@ echo.
 
 "$InstallDir\llama.cpp\build\bin\Release\llama-server.exe" -m "%MODEL%" --host 127.0.0.1 --port 8080 -ngl 99 -c 32768 --chat-template chatml
 pause
-"@
+'@
 $startLlamaPath = "$InstallDir\Start llama-server.bat"
 $startLlama | Out-File -FilePath $startLlamaPath -Encoding ASCII
 Write-Done "Start llama-server → $startLlamaPath"
 
 # List models batch file
-$listModels = @"
+$listModels = @'
 @echo off
 echo.
 echo   Available models in $InstallDir\models\
@@ -673,26 +458,26 @@ echo.
 echo   Usage: "Start llama-server.bat" path\to\model.gguf
 echo.
 pause
-"@
+'@
 $listModelsPath = "$InstallDir\List Models.bat"
 $listModels | Out-File -FilePath $listModelsPath -Encoding ASCII
 Write-Done "List Models → $listModelsPath"
 
 # Create hypercowork.bat launcher in bin (for PATH access)
-$hypercoworkBat = @"
+$hypercoworkBat = @'
 @echo off
 echo.
 echo   Starting HyperCoWork Server...
 echo.
 cd /d "$InstallDir\bin"
 start cmd /k "hypercowork-server.exe"
-"@
+'@
 $hypercoworkBatPath = "$InstallDir\bin\hypercowork.bat"
 $hypercoworkBat | Out-File -FilePath $hypercoworkBatPath -Encoding ASCII
-Write-Done "Created 'hypercowork' command in bin"
+Write-Done "Created hypercowork command in bin"
 
 # Open frontend batch file
-$startFrontend = @"
+$startFrontend = @'
 @echo off
 echo.
 echo   ⚡ Starting HyperCoWork Frontend...
@@ -700,7 +485,7 @@ echo.
 cd /d "$InstallDir\source\apps\frontend"
 bun install
 bun dev
-"@
+'@
 $startFrontendPath = "$InstallDir\Start Frontend.bat"
 $startFrontend | Out-File -FilePath $startFrontendPath -Encoding ASCII
 Write-Done "Start Frontend → $startFrontendPath"
@@ -715,54 +500,57 @@ $Shortcut.Description = "Start HyperCoWork Rust Server"
 $Shortcut.Save()
 Write-Done "Desktop shortcut created"
 
-# Ask to launch now
-Write-Host ""
-Write-Color "  Launch HyperCoWork now? (Y/n)" "Yellow"
-$response = Read-Host
-if ($response -ne "n" -and $response -ne "N") {
-    Write-Color "  Starting server..." "Cyan"
-    Start-Process $startServerPath
-    Write-Color "  Server started! Opening http://localhost:3000..." "Green"
-    Start-Process "http://localhost:3000"
-}
-
-# ─── Add to PATH ───
-Write-Header "PATH"
-
-$currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
-if ($currentPath -notlike "*$InstallDir\bin*") {
-    [Environment]::SetEnvironmentVariable("Path", "$currentPath;$InstallDir\bin", "User")
-    Write-Done "Added $InstallDir\bin to PATH"
-} else {
-    Write-Skip "Already in PATH: $InstallDir\bin"
-}
-
 # ─── Summary ───
-Write-Header "DONE!"
+Write-Header "DONE"
+Write-Host @"
 
-Write-Host "  ┌──────────────────────────────────────────────────────┐" -ForegroundColor DarkCyan
-Write-Host "  │  HyperCoWork Rust v$VERSION installed!                   │" -ForegroundColor Green
-Write-Host "  │                                                      │" -ForegroundColor DarkCyan
-Write-Host "  │  Install dir:  $InstallDir" -ForegroundColor White
-Write-Host "  │  Binaries:     $InstallDir\bin" -ForegroundColor White
-Write-Host "  │  Models:       $InstallDir\models" -ForegroundColor White
-Write-Host "  │  Config:       $InstallDir\config" -ForegroundColor White
-Write-Host "  │                                                      │" -ForegroundColor DarkCyan
-Write-Host "  │  TO START THE APP:                                   │" -ForegroundColor Yellow
-Write-Host "  │                                                      │" -ForegroundColor DarkCyan
-Write-Host "  │  OPTION 1 - Desktop Icon (Recommended)               │" -ForegroundColor White
-Write-Host "  │    • Double-click 'HyperCoWork Server' on Desktop    │" -ForegroundColor White
-Write-Host "  │      (A terminal window will open with the server)   │" -ForegroundColor DarkGray
-Write-Host "  │                                                      │" -ForegroundColor DarkCyan
-Write-Host "  │  OPTION 2 - Taskbar Icon:                            │" -ForegroundColor White
-Write-Host "  │    • Right-click 'HyperCoWork Server.lnk' on Desktop │" -ForegroundColor White
-Write-Host "  │    • Choose 'Pin to taskbar'                          │" -ForegroundColor White
-Write-Host "  │                                                      │" -ForegroundColor DarkCyan
-Write-Host "  │  OPTION 3 - Type 'hypercowork-server' anywhere       │" -ForegroundColor White
-Write-Host "  │    (Open a NEW terminal window first for PATH)        │" -ForegroundColor DarkGray
-Write-Host "  │                                                      │" -ForegroundColor DarkCyan
-Write-Host "  │  Then open: http://localhost:3000 in your browser     │" -ForegroundColor Cyan
-Write-Host "  │                                                      │" -ForegroundColor DarkCyan
-Write-Host "  │  Docs: github.com/$REPO     │" -ForegroundColor Cyan
-Write-Host "  └──────────────────────────────────────────────────────┘" -ForegroundColor DarkCyan
+  ╔═══════════════════════════════════════════════════════════╗
+  ║  Installation complete!                                    ║
+  ╚═══════════════════════════════════════════════════════════╝
+
+  Install location: $InstallDir
+
+  What's installed:
+    ✓ hypercowork-server.exe   (main server)
+    ✓ hypercowork-router.exe    (router)
+    ✓ Config files              (in config/)
+    ✓ Shortcut files           (in $InstallDir)
+
+  To run:
+    1. Download a model to models/
+    2. Run Start Server.bat to start HyperCoWork
+    3. Open http://localhost:3000 for web UI
+
+  Or use the desktop shortcut.
+
+"@ -ForegroundColor White
+
+# ─── Optional: Download Model ───
+if (-not $SkipModels) {
+    Write-Header "DOWNLOAD MODEL"
+    Write-Host "  NOTE: Model download is optional and can be done later" -ForegroundColor DarkGray
+    Write-Host "  Supported: Qwen2.5-7B-Instruct-Q4_K_M.gguf (~4GB)" -ForegroundColor DarkGray
+    Write-Host "  Or any GGUF model from HuggingFace" -ForegroundColor DarkGray
+
+    $downloadModel = Read-Host "  Download Qwen2.5-7B-Instruct-Q4_K_M now? [y/N]"
+    if ($downloadModel -eq "y") {
+        Write-Step "Downloading model (~4GB, will take a while)..."
+        $modelUrl = "https://huggingface.co/bartowski/Qwen2.5-7B-Instruct-GGUF/resolve/main/Qwen2.5-7B-Instruct-Q4_K_M.gguf"
+        $modelPath = "$InstallDir\models\Qwen2.5-7B-Instruct-Q4_K_M.gguf"
+        Start-Spinner
+        try {
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            Invoke-WebRequest -Uri $modelUrl -OutFile $modelPath -UseBasicParsing
+            Stop-Spinner
+            Write-Done "Model downloaded to $modelPath"
+        } catch {
+            Stop-Spinner
+            Write-Warning "Download failed: $_"
+            Write-Host "  → Manually download from: $modelUrl" -ForegroundColor Yellow
+        }
+    }
+}
+
 Write-Host ""
+Write-Host "Press any key to exit..." -ForegroundColor DarkGray
+$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
