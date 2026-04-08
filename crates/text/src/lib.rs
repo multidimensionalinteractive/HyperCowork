@@ -1,4 +1,4 @@
-//! OpenCoWork text processing crate.
+//! HyperCoWork text processing crate.
 //!
 //! Provides text chunking, truncation, and formatting utilities for
 //! splitting long messages across platform character limits.

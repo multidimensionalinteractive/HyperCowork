@@ -1,4 +1,4 @@
-//! OpenCoWork delivery crate.
+//! HyperCoWork delivery crate.
 //!
 //! Provides retry logic with exponential backoff and jitter for
 //! reliable message delivery across platforms.

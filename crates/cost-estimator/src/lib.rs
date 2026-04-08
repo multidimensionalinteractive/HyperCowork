@@ -1,4 +1,4 @@
-//! Token Cost Estimator for OpenCoWork
+//! Token Cost Estimator for HyperCoWork
 //!
 //! Tracks token usage across agents and calculates costs based on
 //! model pricing. Supports per-agent, per-model, and aggregate reporting.

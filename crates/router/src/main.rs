@@ -1,4 +1,4 @@
-//! OpenCoWork Router CLI entry point.
+//! HyperCoWork Router CLI entry point.
 
 use clap::Parser;
 use hypercowork_router::{RouterConfig, RouterCore};

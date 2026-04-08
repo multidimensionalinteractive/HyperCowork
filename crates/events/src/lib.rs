@@ -1,4 +1,4 @@
-//! OpenCoWork events crate.
+//! HyperCoWork events crate.
 //!
 //! Provides event types and broadcasting infrastructure.
 

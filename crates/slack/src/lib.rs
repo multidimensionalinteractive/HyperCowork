@@ -1,4 +1,4 @@
-//! OpenCoWork Slack adapter.
+//! HyperCoWork Slack adapter.
 //!
 //! Provides Slack integration via Socket Mode or Events API.
 //! This is a simplified implementation — production use requires

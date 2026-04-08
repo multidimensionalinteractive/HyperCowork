@@ -1,4 +1,4 @@
-//! HTTP handlers for the OpenCoWork server.
+//! HTTP handlers for the HyperCoWork server.
 //!
 //! Implements all API endpoints including health checks, SSE event streams,
 //! workspace management, file operations, and command execution.

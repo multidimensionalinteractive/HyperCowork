@@ -14,7 +14,7 @@ use std::sync::Arc;
 use tokio::sync::broadcast;
 use tokio::net::TcpListener;
 
-/// The OpenCoWork HTTP server.
+/// The HyperCoWork HTTP server.
 ///
 /// Use [`Server::builder`] to create and configure a server instance,
 /// then call [`Server::run`] to start listening for connections.

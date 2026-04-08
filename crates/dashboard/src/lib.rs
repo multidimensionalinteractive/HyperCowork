@@ -1,4 +1,4 @@
-//! Dashboard Components for OpenCoWork
+//! Dashboard Components for HyperCoWork
 //!
 //! Provides inbox, todo list, kanban board, brief generation,
 //! and multi-instance management for Hermes agent control dashboard.

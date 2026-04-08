@@ -1,4 +1,4 @@
-//! OpenCoWork Server CLI entry point.
+//! HyperCoWork Server CLI entry point.
 //!
 //! Parses CLI arguments and starts the Axum HTTP server.
 
@@ -8,7 +8,7 @@ use hypercowork_server::server::Server;
 use std::path::PathBuf;
 use tracing_subscriber::{fmt, EnvFilter};
 
-/// OpenCoWork high-performance server.
+/// HyperCoWork high-performance server.
 ///
 /// A Rust replacement for the TypeScript/Bun OpenWork server,
 /// built with Axum for maximum throughput and minimal latency.

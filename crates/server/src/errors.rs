@@ -1,4 +1,4 @@
-//! Error types for the OpenCoWork server.
+//! Error types for the HyperCoWork server.
 //!
 //! Provides a unified error type with Axum `IntoResponse` implementation
 //! for consistent HTTP error responses.

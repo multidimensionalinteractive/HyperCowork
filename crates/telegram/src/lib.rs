@@ -1,4 +1,4 @@
-//! OpenCoWork Telegram adapter.
+//! HyperCoWork Telegram adapter.
 //!
 //! Provides Telegram bot integration using Teloxide.
 //! This is a simplified implementation — production use requires

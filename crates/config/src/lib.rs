@@ -1,6 +1,6 @@
-//! OpenCoWork configuration crate.
+//! HyperCoWork configuration crate.
 //!
-//! Provides configuration types and parsing for the OpenCoWork platform.
+//! Provides configuration types and parsing for the HyperCoWork platform.
 
 /// Placeholder for workspace configuration.
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]

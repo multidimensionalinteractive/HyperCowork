@@ -1,6 +1,6 @@
-//! OpenCoWork Server Library
+//! HyperCoWork Server Library
 //!
-//! High-performance Rust server for OpenCoWork, replacing the TypeScript/Bun server
+//! High-performance Rust server for HyperCoWork, replacing the TypeScript/Bun server
 //! with an Axum-based implementation. Provides:
 //!
 //! - **SSE event streaming** for real-time updates

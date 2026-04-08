@@ -1,3 +1,3 @@
-//! OpenCoWork media crate.
+//! HyperCoWork media crate.
 //!
 //! Provides media handling utilities.

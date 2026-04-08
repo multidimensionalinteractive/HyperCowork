@@ -1,4 +1,4 @@
-//! Hermes Agent Integration for OpenCoWork
+//! Hermes Agent Integration for HyperCoWork
 //!
 //! Provides client functionality for connecting to Hermes agents,
 //! monitoring their status, and managing tasks across the fleet.

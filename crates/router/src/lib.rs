@@ -1,4 +1,4 @@
-//! OpenCoWork Router
+//! HyperCoWork Router
 //!
 //! High-performance message routing engine that bridges messaging platforms
 //! (Telegram, Slack) with the opencode AI engine. Handles:
