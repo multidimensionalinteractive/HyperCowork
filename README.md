@@ -497,6 +497,120 @@ Run `cargo bench` to generate benchmarks. Results are compared against the TypeS
   └──────────────────────┴───────────┴───────────┴──────────┘
 ```
 
+## 🤖 Hermes Agent Integration
+
+OpenCoWork can serve as the **control center** for your Hermes agent fleet. Connect your Hermes instances to get unified monitoring, project management, and automation.
+
+### Agent Control Dashboard
+
+```
+  ┌────────────────────────────────────────────────────────────────────┐
+  │  🤖 Hermes Control Center                            [Settings] ⚙️  │
+  ├────────────────────────────────────────────────────────────────────┤
+  │                                                                    │
+  │  AGENTS                        PROJECTS          COST ESTIMATOR     │
+  │  ──────────────────────────    ──────────────    ──────────────── │
+  │  ┌────────────────────────┐   ┌──────────────┐   Today's Spend    │
+  │  │ ● hyperagent1          │   │ Accrued Mkts │   $2.47           │
+  │  │   Telegram | Running    │   │ Running      │   ━━━━━━━━━━░░░   │
+  │  │   Model: MiMo-V2-Flash │   │ 3 agents    │   $0.12 / hour    │
+  │  │   Tokens: 1.2M today   │   └──────────────┘                   │
+  │  └────────────────────────┘   ┌──────────────┐   Token Breakdown   │
+  │  ┌────────────────────────┐   │ MDI.io      │   ┌──────────────┐  │
+  │  │ ● beta-hermes42        │   │ Planning    │   │ Input  1.1M  │  │
+  │  │   Win11 | Idle         │   │ 1 agent     │   │ Output 0.3M │  │
+  │  │   Model: Gemma-4-26B   │   └──────────────┘   │ Cache   0.8M │  │
+  │  │   Tokens: 890K today   │   ┌──────────────┐   └──────────────┘  │
+  │  └────────────────────────┘   │ Tyler Bot   │                      │
+  │                                │ Monitoring  │   Cost by Model      │
+  │  INBOX (3 new)                │ 2 agents    │   MiMo-V2-Flash $1.23│
+  │  ──────────────                └──────────────┘   Gemma-4-26B   $0.89│
+  │  📬 Morning Brief - 8:02am                            │
+  │  📬 Code Review Done - 9:15am                         │
+  │  📬 Tyler: Deploy needed  - 9:45am                    │
+  │                                                            │
+  │  TODO (5 items)                      MORNING BRIEF       │
+  │  ─────────────────                   ──────────────       │
+  │  ☑ Deploy v2.4 to prod              Good morning!        │
+  │  ☐ Review PR #847                   • 3 tasks completed │
+  │  ☐ Update docs                      • 2 errors fixed     │
+  │  ☐ Run tests                        • 1 new lead        │
+  │  ☐ Sync mempalace                   • Tokens: $0.34     │
+  │                                                             │
+  └────────────────────────────────────────────────────────────────────┘
+```
+
+### Features
+
+| Feature | Description |
+|---------|-------------|
+| **Multi-Agent Monitoring** | Track all Hermes agents across servers. See status, model, token usage, and activity in real-time. |
+| **Project Management** | Group agents by project (Accrued Markets, MDI.io, Tyler Bot, etc.). Track progress per project. |
+| **Token Cost Estimator** | Real-time token counting and cost estimation per agent, per model, per day. Set budget alerts. |
+| **Inbox** | Unified inbox for morning/evening briefs, notifications, and agent updates delivered to Telegram. |
+| **Todo List** | Kanban-style todo list synced with agent tasks. Track what needs doing, in progress, done. |
+| **Kanban Board** | Visual project board with columns: Inbox, To Do, In Progress, Review, Done. Drag-drop tasks. |
+| **Morning Briefs** | Daily 8am briefing delivered to Telegram: overnight activity, today's tasks, token costs. |
+| **Evening Reviews** | Daily end-of-day summary: completed tasks, token usage, any issues encountered. |
+
+### Setup
+
+```bash
+# Connect Hermes to OpenCoWork dashboard
+cd /root/opencowork-rust
+cargo run -p opencowork-router -- --config router.toml --hermes http://your-hermes:8080
+
+# Or use the built-in dashboard
+./target/release/opencowork-server --workspace /path/to/projects \
+  --telegram YOUR_BOT_TOKEN \
+  --hermes-endpoint http://localhost:8080
+```
+
+### Inbox & Briefs
+
+```
+  INBOX                          EVENING REVIEW (6pm)
+  ─────                          ─────────────────────
+  📬 8:02am - Morning Brief     Today's Summary:
+     • 3 agents running          ━━━━━━━━━━━━━━━━━━━
+     • Tokens: $0.12 so far     ✅ Deployed v2.4
+     • 2 tasks queued           ✅ Fixed auth bug
+                                 ✅ Tyler bot updated
+  📬 9:15am - Code Review         
+
+  📬 9:45am - Tyler Message
+     "Deploy to prod?"
+```
+
+### Cost Estimator
+
+```
+  TOKEN USAGE TODAY
+  ┌─────────────────────────────────────────────────────┐
+  │  hyperagent1 (MiMo-V2-Flash)                        │
+  │  Input:      1,156,234 tokens  =  $0.12           │
+  │  Output:       342,891 tokens  =  $0.03           │
+  │  Cache:         891,234 tokens  =  $0.04           │
+  │  ─────────────────────────────────────────────────  │
+  │  Total:       2,390,359 tokens  =  $0.19/day     │
+  │                                              $5.70/mo│
+  │                                                     │
+  │  beta-hermes42 (Gemma-4-26B)                       │
+  │  Input:        890,123 tokens  =  $0.12           │
+  │  Output:       234,567 tokens  =  $0.03           │
+  │  Cache:        567,890 tokens  =  $0.07           │
+  │  ─────────────────────────────────────────────────  │
+  │  Total:       1,692,580 tokens  =  $0.22/day     │
+  │                                              $6.60/mo│
+  │                                                     │
+  │  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━   │
+  │  DAILY TOTAL:                    $0.41           │
+  │  MONTHLY PROJECTION:             $12.30           │
+  └─────────────────────────────────────────────────────┘
+```
+
+---
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
