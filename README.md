@@ -1,38 +1,26 @@
 ```
- ██████╗ ██████╗ ███████╗███╗   ██╗ ██████╗ ██████╗ ██╗    ██╗ ██████╗ ██████╗ ██╗  ██╗
-██╔═══██╗██╔══██╗██╔════╝████╗  ██║██╔═══██╗██╔══██╗██║    ██║██╔═══██╗██╔══██╗██║ ██╔╝
-██║   ██║██████╔╝█████╗  ██╔██╗ ██║██║   ██║██████╔╝██║ █╗ ██║██║   ██║██████╔╝█████╔╝ 
-██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║██║   ██║██╔══██╗██║███╗██║██║   ██║██╔══██╗██╔═██╗ 
-╚██████╔╝██║     ███████╗██║ ╚████║╚██████╔╝██║  ██║╚███╔███╔╝╚██████╔╝██║  ██║██║  ██╗
- ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝ ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝
-                                                                                           
-   ╔══════════════════════════════════════════════════════════════════╗
-   ║  🦀 RUST-Powered  •  ⚡ BLAZING FAST  •  🔒 MEMORY SAFE        ║
-   ║  Open-source Claude Cowork alternative — rebuilt from scratch   ║
-   ╚══════════════════════════════════════════════════════════════════╝
-   
-        ┌─────────────────────────────────────────────────────────┐
-        │  ┌─────────┐    ┌──────────┐    ┌──────────┐           │
-        │  │ SolidJS  │───▶│  Axum    │───▶│  Router  │           │
-        │  │ + WASM   │    │  Server  │    │  (Tel/Sl)│           │
-        │  └─────────┘    └──────────┘    └──────────┘           │
-        │       │              │               │                  │
-        │       ▼              ▼               ▼                  │
-        │  ┌─────────┐    ┌──────────┐    ┌──────────┐           │
-        │  │ Biome   │    │ Tokio    │    │ Telegram │           │
-        │  │ Linter  │    │ Runtime  │    │ + Slack  │           │
-        │  └─────────┘    └──────────┘    └──────────┘           │
-        │                                                        │
-        │  ┌──────────────────────────────────────────┐          │
-        │  │  🏎️  10x faster server  •  5x less RAM   │          │
-        │  │  🔋 Single binary  •  Zero Node runtime  │          │
-        │  └──────────────────────────────────────────┘          │
-        └─────────────────────────────────────────────────────────┘
+  ╔══════════════════════════════════════════╗
+  ║  🦀 RUST-Powered  •  ⚡ BLAZING FAST   ║
+  ║  OpenCoWork — Claude Cowork Alternative ║
+  ╚══════════════════════════════════════════╝
 ```
 
 # OpenCoWork Rust 🦀
 
 **A high-performance Rust refactor of [OpenWork](https://github.com/different-ai/openwork)** — the open-source Claude Cowork/Codex alternative.
+
+## Key Features
+
+| Feature | Description |
+|---------|-------------|
+| **Voice-enabled** | Send voice memos via Telegram. Transcribes audio and processes your request automatically. |
+| **MCP tool extensibility** | Connect any MCP server — GitHub, Google Drive, Notion, Slack, internal APIs, custom functions. |
+| **Obsidian-compatible vault** | Built-in knowledge graph with Obsidian vault support. Automatic memory organization. |
+| **Background agents** | Agents work in the background while you continue your day. Deliver results when done. |
+| **Web search** | Integrated web search for research tasks. Multi-step research without manual effort. |
+| **Telegram & Slack** | Message your agent from Telegram or Slack while it works on a cloud VM. Cross-platform continuity. |
+| **Automatic knowledge graph** | Agent builds and maintains a knowledge graph of your projects, preferences, and history. |
+| **🦀 Rust-powered** | 10x faster server, 5x less RAM. Single binary, zero Node runtime. |
 
 ![OpenCoWork UX Preview](screenshot-full.png)
 
