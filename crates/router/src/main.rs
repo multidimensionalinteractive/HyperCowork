@@ -1,7 +1,7 @@
 //! OpenCoWork Router CLI entry point.
 
 use clap::Parser;
-use opencowork_router::{RouterConfig, RouterCore};
+use hypercowork_router::{RouterConfig, RouterCore};
 use tracing_subscriber::EnvFilter;
 
 #[derive(Parser)]

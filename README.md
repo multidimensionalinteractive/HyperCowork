@@ -1,11 +1,11 @@
 ```
   ╔══════════════════════════════════════════╗
   ║  🦀 RUST-Powered  •  ⚡ BLAZING FAST   ║
-  ║  OpenCoWork — Claude Cowork Alternative ║
+  ║  HyperCoWork — Claude Cowork Alternative ║
   ╚══════════════════════════════════════════╝
 ```
 
-# OpenCoWork Rust 🦀
+# HyperCoWork Rust 🦀
 
 **A high-performance Rust refactor of [OpenWork](https://github.com/different-ai/openwork)** — the open-source Claude Cowork/Codex alternative.
 
@@ -31,7 +31,7 @@
 | **Disk Space Manager** | Find large files, identify duplicates, suggest cleanup candidates. Save gigabytes effortlessly. |
 | **Google Drive Sync** | Automatic backups to Google Drive. Access your files anywhere, never lose important data. |
 
-![OpenCoWork UX Preview](screenshot-full.png)
+![HyperCoWork UX Preview](screenshot-full.png)
 
 ## 🚀 Installation Guide
 
@@ -39,15 +39,15 @@
 
 ```powershell
 # Download and run the installer
-irm https://raw.githubusercontent.com/multidimensionalinteractive/opencowork-rust/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/multidimensionalinteractive/HyperCoWork/main/install.ps1 | iex
 
 # Or with GPU acceleration (NVIDIA)
-irm https://raw.githubusercontent.com/multidimensionalinteractive/opencowork-rust/main/install.ps1 | iex; install.ps1 -Cuda
+irm https://raw.githubusercontent.com/multidimensionalinteractive/HyperCoWork/main/install.ps1 | iex; install.ps1 -Cuda
 ```
 
 The Windows installer automates:
 - ✅ Rust toolchain installation
-- ✅ OpenCoWork build from source
+- ✅ HyperCoWork build from source
 - ✅ llama.cpp with CUDA acceleration (if `-Cuda` flag)
 - ✅ Model downloads (auto-selects based on your GPU VRAM)
 - ✅ Server/router config generation
@@ -62,14 +62,14 @@ For an interactive setup experience, use the built-in installer:
 
 ```bash
 # Run the guided setup wizard
-cargo run -p opencowork-installer
+cargo run -p HyperCoWork-installer
 ```
 
 The installer gives you **two options**:
 
 ```
 ═══════════════════════════════════════════
-  OpenCoWork Installer v0.1.0
+  HyperCoWork Installer v0.1.0
 ═══════════════════════════════════════════
 
   [0] 🚀 Connect to existing Hermes
@@ -90,7 +90,7 @@ The installer gives you **two options**:
 - Configure API keys, Telegram, GitHub
 - Set briefing schedule
 
-Both options generate a working `config.yaml` and save to `~/.config/opencowork/`.
+Both options generate a working `config.yaml` and save to `~/.config/HyperCoWork/`.
 
 ### Linux / macOS (Prerequisites)
 
@@ -106,32 +106,32 @@ curl -fsSL https://bun.sh/install | bash
 ### Build from Source
 
 ```bash
-git clone https://github.com/multidimensionalinteractive/opencowork-rust.git
-cd opencowork-rust
+git clone https://github.com/multidimensionalinteractive/HyperCoWork.git
+cd HyperCoWork
 
 # Build all crates (release mode for max performance)
 cargo build --release
 
 # Binaries are in target/release/
-ls target/release/opencowork-server
-ls target/release/opencowork-router
+ls target/release/HyperCoWork-server
+ls target/release/HyperCoWork-router
 ```
 
 ### Run the Server
 
 ```bash
 # Start with a workspace
-./target/release/opencowork-server --workspace /path/to/your/project
+./target/release/HyperCoWork-server --workspace /path/to/your/project
 
 # With custom port and auth token
-./target/release/opencowork-server \
+./target/release/HyperCoWork-server \
   --workspace ~/my-project \
   --port 8080 \
   --host 127.0.0.1 \
   --token my-secret-token
 
 # Auto-approve all file mutations (use with caution)
-./target/release/opencowork-server --workspace . --approval auto
+./target/release/HyperCoWork-server --workspace . --approval auto
 ```
 
 ### Run the Router (Telegram/Slack)
@@ -149,7 +149,7 @@ dedup_window_secs = 30
 EOF
 
 # Start router
-./target/release/opencowork-router --config router.toml
+./target/release/HyperCoWork-router --config router.toml
 ```
 
 ### Frontend Dev Server
@@ -220,7 +220,7 @@ wget https://huggingface.co/NousResearch/Hermes-3-Llama-3.1-70B-GGUF/resolve/mai
   -c 32768 \           # Context length
   --chat-template chatml
 
-# Now point OpenCoWork at your local model:
+# Now point HyperCoWork at your local model:
 # Set opencode_url to http://localhost:8080 in your config
 ```
 
@@ -281,7 +281,7 @@ These models have safety filters removed — use responsibly:
 ## Architecture
 
 ```
-opencowork-rust/
+HyperCoWork/
 ├── crates/
 │   ├── server/          # Axum HTTP server (replaces apps/server)
 │   │   ├── src/
@@ -324,13 +324,13 @@ opencowork-rust/
 
 ## 🎨 UX Enhancements Over OpenWork
 
-OpenWork's UI is functional but basic — standard SolidJS components, minimal styling, no keyboard shortcuts. OpenCoWork introduces a premium design system inspired by Linear, Raycast, and VS Code.
+OpenWork's UI is functional but basic — standard SolidJS components, minimal styling, no keyboard shortcuts. HyperCoWork introduces a premium design system inspired by Linear, Raycast, and VS Code.
 
 ```
   ┌──────────────────────────────────────────────────────────────┐
   │                    UX Feature Comparison                     │
   ├──────────────────┬──────────────┬───────────────────────────┤
-  │ Feature          │ OpenWork     │ OpenCoWork                │
+  │ Feature          │ OpenWork     │ HyperCoWork                │
   ├──────────────────┼──────────────┼───────────────────────────┤
   │ Command Palette  │      ✗       │ ⌘K — Raycast-style       │
   │ Keyboard Nav     │   Partial    │ Full (⌘K/N/B/F/,/)       │
@@ -425,7 +425,7 @@ The design system uses:
 
 ```
   ┌─────────────────────────────────────────────────────────┐
-  │  OpenCoWork Architecture              24 messages   ⚙️  │
+  │  HyperCoWork Architecture              24 messages   ⚙️  │
   ├─────────────────────────────────────────────────────────┤
   │                                                         │
   │  ┌──┐ You                                    2m ago     │
@@ -433,7 +433,7 @@ The design system uses:
   │  └──┘ between our Rust Axum server and TS Bun?         │
   │     [Copy] [Regenerate]                                 │
   │                                                         │
-  │  ┌──┐ OpenCoWork                              1m ago    │
+  │  ┌──┐ HyperCoWork                              1m ago    │
   │  │OW│ Here's the breakdown:                             │
   │  └──┘ ┌────────┬─────────┬──────────┬───────┐          │
   │       │ Metric │ Bun(TS) │ Axum(Rst)│ Delta │          │
@@ -451,7 +451,7 @@ The design system uses:
   │  │M │ What about the Mojo acceleration for             │
   │  └──┘ inference-adjacent compute?                      │
   │                                                         │
-  │  ┌──┐ OpenCoWork                                        │
+  │  ┌──┐ HyperCoWork                                        │
   │  │OW│ · · ·   (thinking...)                             │
   │  └──┘                                                   │
   ├─────────────────────────────────────────────────────────┤
@@ -491,10 +491,10 @@ Slide-in from right, auto-dismiss after 3s. Types: success (green), error (red),
 cargo build --release
 
 # Run server
-cargo run -p opencowork-server -- --workspace /path/to/project
+cargo run -p HyperCoWork-server -- --workspace /path/to/project
 
 # Run router (with Telegram)
-cargo run -p opencowork-router -- --config router.toml
+cargo run -p HyperCoWork-router -- --config router.toml
 
 # Run benchmarks
 cargo bench
@@ -548,19 +548,19 @@ Run `cargo bench` to generate benchmarks. Results are compared against the TypeS
 
 ## 🤖 Hermes Agent Integration
 
-OpenCoWork serves as the **control center** for your Hermes agent fleet. It connects to your existing Hermes setups and provides a unified dashboard for monitoring, project management, cost tracking, and automation — all accessible from Telegram.
+HyperCoWork serves as the **control center** for your Hermes agent fleet. It connects to your existing Hermes setups and provides a unified dashboard for monitoring, project management, cost tracking, and automation — all accessible from Telegram.
 
 ### Connect Your Existing Hermes Setup
 
-Have a Hermes bot running? Point OpenCoWork at it and instantly get the dashboard, cost tracking, briefs, and kanban board.
+Have a Hermes bot running? Point HyperCoWork at it and instantly get the dashboard, cost tracking, briefs, and kanban board.
 
 ```bash
 # Option 1: Via the interactive installer (easiest)
-cargo run -p opencowork-installer
+cargo run -p HyperCoWork-installer
 # → Select "Connect to existing Hermes" during setup
 
 # Option 2: Via CLI
-./target/release/opencowork-server \
+./target/release/HyperCoWork-server \
   --hermes http://your-hermes:8080 \
   --telegram YOUR_BOT_TOKEN
 
@@ -575,7 +575,7 @@ bot_token = "YOUR_BOT_TOKEN"
 EOF
 ```
 
-No migration needed. Your agents keep running as-is. OpenCoWork just wraps them with the control plane.
+No migration needed. Your agents keep running as-is. HyperCoWork just wraps them with the control plane.
 
 ### Agent Control Dashboard
 
@@ -632,12 +632,12 @@ No migration needed. Your agents keep running as-is. OpenCoWork just wraps them 
 ### Setup
 
 ```bash
-# Connect Hermes to OpenCoWork dashboard
-cd /root/opencowork-rust
-cargo run -p opencowork-router -- --config router.toml --hermes http://your-hermes:8080
+# Connect Hermes to HyperCoWork dashboard
+cd /root/HyperCoWork
+cargo run -p HyperCoWork-router -- --config router.toml --hermes http://your-hermes:8080
 
 # Or use the built-in dashboard
-./target/release/opencowork-server --workspace /path/to/projects \
+./target/release/HyperCoWork-server --workspace /path/to/projects \
   --telegram YOUR_BOT_TOKEN \
   --hermes-endpoint http://localhost:8080
 ```
@@ -689,7 +689,7 @@ cargo run -p opencowork-router -- --config router.toml --hermes http://your-herm
 
 ## What You Can Automate ✨
 
-OpenCoWork isn't just an AI chat interface — it's a powerful automation platform. Here are real things you can do with it:
+HyperCoWork isn't just an AI chat interface — it's a powerful automation platform. Here are real things you can do with it:
 
 ### 📱 Social Media Automation
 
@@ -863,8 +863,8 @@ Agent: "Backing up ~/projects/...
 
 ```bash
 # Run the interactive installer
-cd opencowork-rust
-cargo run -p opencowork-installer
+cd HyperCoWork
+cargo run -p HyperCoWork-installer
 
 # Configure your first automation
 # 1. Select Telegram bot token
@@ -873,7 +873,7 @@ cargo run -p opencowork-installer
 # 4. Set your briefing schedule
 
 # Start the server
-cargo run -p opencowork-server -- --workspace ~/my-projects
+cargo run -p HyperCoWork-server -- --workspace ~/my-projects
 
 # Send your first command via Telegram
 /send "Organize my downloads folder"

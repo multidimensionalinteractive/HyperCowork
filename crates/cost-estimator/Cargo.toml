@@ -1,5 +1,5 @@
 [package]
-name = "opencowork-cost-estimator"
+name = "hypercowork-cost-estimator"
 version.workspace = true
 edition.workspace = true
 

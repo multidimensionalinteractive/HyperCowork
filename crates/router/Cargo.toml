@@ -1,11 +1,11 @@
 [package]
-name = "opencowork-router"
+name = "hypercowork-router"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 
 [[bin]]
-name = "opencowork-router"
+name = "hypercowork-router"
 path = "src/main.rs"
 
 [dependencies]
@@ -21,10 +21,10 @@ uuid = { workspace = true }
 dashmap = { workspace = true }
 futures = { workspace = true }
 
-opencowork-telegram = { path = "../telegram" }
-opencowork-slack = { path = "../slack" }
-opencowork-delivery = { path = "../delivery" }
-opencowork-text = { path = "../text" }
+hypercowork-telegram = { path = "../telegram" }
+hypercowork-slack = { path = "../slack" }
+hypercowork-delivery = { path = "../delivery" }
+hypercowork-text = { path = "../text" }
 
 clap = { version = "4", features = ["derive", "env"] }
 toml = { workspace = true }

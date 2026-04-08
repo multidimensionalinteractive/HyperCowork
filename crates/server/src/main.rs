@@ -3,8 +3,8 @@
 //! Parses CLI arguments and starts the Axum HTTP server.
 
 use clap::Parser;
-use opencowork_server::config::{ApprovalMode, ServerConfig};
-use opencowork_server::server::Server;
+use hypercowork_server::config::{ApprovalMode, ServerConfig};
+use hypercowork_server::server::Server;
 use std::path::PathBuf;
 use tracing_subscriber::{fmt, EnvFilter};
 

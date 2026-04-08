@@ -8,10 +8,10 @@
 //! - Delivery retry with exponential backoff
 //! - Error classification and recovery
 
-pub use opencowork_delivery::{DeliveryError, ErrorClass};
-pub use opencowork_text::{chunk_text, truncate_text};
-pub use opencowork_telegram::{TelegramAdapter, TelegramIdentity, TelegramInboundMessage};
-pub use opencowork_slack::{SlackAdapter, SlackIdentity, SlackInboundMessage};
+pub use hypercowork_delivery::{DeliveryError, ErrorClass};
+pub use hypercowork_text::{chunk_text, truncate_text};
+pub use hypercowork_telegram::{TelegramAdapter, TelegramIdentity, TelegramInboundMessage};
+pub use hypercowork_slack::{SlackAdapter, SlackIdentity, SlackInboundMessage};
 
 use dashmap::DashMap;
 use serde::{Deserialize, Serialize};

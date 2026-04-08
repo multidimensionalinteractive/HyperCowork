@@ -1,11 +1,11 @@
 [package]
-name = "opencowork-server"
+name = "hypercowork-server"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 
 [[bin]]
-name = "opencowork-server"
+name = "hypercowork-server"
 path = "src/main.rs"
 
 [dependencies]
@@ -33,9 +33,9 @@ bytes = { workspace = true }
 futures = { workspace = true }
 
 # Internal crates
-opencowork-config = { path = "../config" }
-opencowork-events = { path = "../events" }
-opencowork-media = { path = "../media" }
+hypercowork-config = { path = "../config" }
+hypercowork-events = { path = "../events" }
+hypercowork-media = { path = "../media" }
 
 # CLI parsing
 clap = { version = "4", features = ["derive", "env"] }

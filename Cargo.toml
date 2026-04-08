@@ -14,12 +14,14 @@ members = [
     "crates/dashboard",
     "crates/installer",
 ]
-resolver = "2"
 
 [workspace.package]
+name = "hypercowork"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
+
+resolver = "2"
 
 [workspace.dependencies]
 # Async runtime

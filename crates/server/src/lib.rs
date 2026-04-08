@@ -20,8 +20,8 @@
 //! # Example
 //!
 //! ```rust,no_run
-//! use opencowork_server::server::Server;
-//! use opencowork_server::config::{ServerConfig, ApprovalMode};
+//! use hypercowork_server::server::Server;
+//! use hypercowork_server::config::{ServerConfig, ApprovalMode};
 //! use std::path::PathBuf;
 //!
 //! # async fn example() -> anyhow::Result<()> {

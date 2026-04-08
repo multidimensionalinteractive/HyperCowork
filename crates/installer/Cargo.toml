@@ -1,5 +1,5 @@
 [package]
-name = "opencowork-installer"
+name = "hypercowork-installer"
 version.workspace = true
 edition.workspace = true
 
@@ -18,4 +18,4 @@ console = "0.15"
 indicatif = "0.17"
 dirs = "5"
 
-opencowork-hermes = { path = "../hermes" }
+hypercowork-hermes = { path = "../hermes" }

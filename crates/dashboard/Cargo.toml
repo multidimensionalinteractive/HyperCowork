@@ -1,5 +1,5 @@
 [package]
-name = "opencowork-dashboard"
+name = "hypercowork-dashboard"
 version.workspace = true
 edition.workspace = true
 
@@ -14,5 +14,5 @@ parking_lot = { workspace = true }
 thiserror = { workspace = true }
 anyhow = { workspace = true }
 
-opencowork-hermes = { path = "../hermes" }
-opencowork-cost-estimator = { path = "../cost-estimator" }
+hypercowork-hermes = { path = "../hermes" }
+hypercowork-cost-estimator = { path = "../cost-estimator" }

@@ -93,7 +93,7 @@ fn get_model_pricing(model: &str) -> &'static str {
 
 /// Try to auto-discover Hermes on common ports
 async fn try_discover_hermes() -> Option<String> {
-    use opencowork_hermes::HermesClient;
+    use hypercowork_hermes::HermesClient;
     
     let ports = [(8080, "localhost"), (8081, "localhost"), (3000, "localhost")];
     
@@ -170,7 +170,7 @@ async fn run_connect_existing() -> Result<AgentConfig> {
     
     // Verify connection
     print_info("Verifying connection...");
-    let client = opencowork_hermes::HermesClient::connect(&endpoint, None);
+    let client = hypercowork_hermes::HermesClient::connect(&endpoint, None);
     
     match client.health_check().await {
         Ok((name, model, status)) => {
