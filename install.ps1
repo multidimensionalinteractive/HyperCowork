@@ -1,4 +1,4 @@
-# HyperCoWork Rust — Windows Installer
+# HyperCoWork Rust -- Windows Installer
 #
 # Automates full setup: Rust, llama.cpp, HyperCoWork, models
 # Run in PowerShell as Administrator:
@@ -30,29 +30,29 @@ function Write-Color($Text, $Color = "White") {
 
 function Write-Header($Text) {
     Write-Host ""
-    Write-Host "  ╔══════════════════════════════════════════════╗" -ForegroundColor DarkCyan
-    Write-Host "  ║  $Text" -ForegroundColor Cyan
-    Write-Host "  ╚══════════════════════════════════════════════╝" -ForegroundColor DarkCyan
+    Write-Host "  +==============================================+" -ForegroundColor DarkCyan
+    Write-Host "  |  $Text" -ForegroundColor Cyan
+    Write-Host "  +==============================================+" -ForegroundColor DarkCyan
     Write-Host ""
 }
 
 function Write-Step($Text) {
-    Write-Host "  → " -ForegroundColor DarkGray -NoNewline
+    Write-Host "  > " -ForegroundColor DarkGray -NoNewline
     Write-Host $Text -ForegroundColor White
 }
 
 function Write-Done($Text) {
-    Write-Host "  ✓ " -ForegroundColor Green -NoNewline
+    Write-Host "  > " -ForegroundColor Green -NoNewline
     Write-Host $Text -ForegroundColor White
 }
 
 function Write-Skip($Text) {
-    Write-Host "  ⊘ " -ForegroundColor Yellow -NoNewline
+    Write-Host "  o " -ForegroundColor Yellow -NoNewline
     Write-Host $Text -ForegroundColor Gray
 }
 
 function Write-Error($Text) {
-    Write-Host "  ✗ " -ForegroundColor Red -NoNewline
+    Write-Host "  X " -ForegroundColor Red -NoNewline
     Write-Host $Text -ForegroundColor White
 }
 
@@ -70,7 +70,7 @@ function Test-NvidiaGpu() {
 }
 
 # Progress spinner for long operations
-$spinnerChars = @("⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏")
+$spinnerChars = @("*", "*", "*", "*", "*", "*", "*", "*", "*", "*")
 $spinnerIndex = 0
 $spinnerActive = $false
 
@@ -91,19 +91,19 @@ function Stop-Spinner {
     Write-Host ""
 }
 
-# ─── ASCII Banner ───
+# --- ASCII Banner ---
 function Show-Banner {
     Write-Host ""
-    Write-Host "  ╔══════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-    Write-Host "  ║   HYPER · AGENT · COWORK · FLEET                      ║" -ForegroundColor Cyan
-    Write-Host "  ║          CONTROL SYSTEM                               ║" -ForegroundColor Cyan
-    Write-Host "  ╚══════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
+    Write-Host "  +==========================================================+" -ForegroundColor Cyan
+    Write-Host "  |   HYPER - AGENT - COWORK - FLEET                      |" -ForegroundColor Cyan
+    Write-Host "  |          CONTROL SYSTEM                               |" -ForegroundColor Cyan
+    Write-Host "  +==========================================================+" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "  Version $VERSION" -ForegroundColor Gray
     Write-Host ""
 }
 
-# ─── Help ───
+# --- Help ---
 if ($Help) {
     Show-Banner
     Write-Host @"
@@ -127,7 +127,7 @@ if ($Help) {
     exit 0
 }
 
-# ─── Show Banner ───
+# --- Show Banner ---
 Show-Banner
 
 Write-Header "SYSTEM CHECK"
@@ -156,7 +156,7 @@ if ($isAdmin) {
     Write-Step "Not running as Administrator (some features may fail)"
 }
 
-# ─── Detect Missing Tools ───
+# --- Detect Missing Tools ---
 $missingTools = @()
 
 Write-Header "DEPENDENCIES"
@@ -199,7 +199,7 @@ if ((Test-NvidiaGpu) -and $Cuda) {
     exit 1
 }
 
-# ─── Auto-Install Missing Dependencies ───
+# --- Auto-Install Missing Dependencies ---
 if ($missingTools -contains "git") {
     Write-Header "INSTALLING GIT"
     Write-Step "Downloading Git for Windows..."
@@ -275,7 +275,7 @@ if ($missingTools -contains "vsbuild") {
         Stop-Spinner
         Write-Done "Downloaded VS Build Tools"
         Write-Step "Installing (this takes 10-20 minutes)..."
-        Write-Host "  → NOTE: You may see a GUI window for VS Build Tools" -ForegroundColor Yellow
+        Write-Host "  > NOTE: You may see a GUI window for VS Build Tools" -ForegroundColor Yellow
         Start-Process -Wait -FilePath $vsInstaller -ArgumentList "--quiet", "--wait", "--norestart", "--nocache", "--add", "Microsoft.VisualStudio.Workload.VCTools", "--add", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64", "--add", "Microsoft.VisualStudio.Component.Windows11SDK.22000"
         Write-Done "VS Build Tools installed"
     } catch {
@@ -285,7 +285,7 @@ if ($missingTools -contains "vsbuild") {
     }
 }
 
-# ─── Create Install Directory ───
+# --- Create Install Directory ---
 Write-Header "SETUP"
 Write-Step "Creating $InstallDir"
 New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
@@ -294,7 +294,7 @@ New-Item -ItemType Directory -Force -Path "$InstallDir\config" | Out-Null
 New-Item -ItemType Directory -Force -Path "$InstallDir\models" | Out-Null
 Write-Done "Directories created"
 
-# ─── Clone Repository ───
+# --- Clone Repository ---
 Write-Header "CLONING REPO"
 $repoDir = "$InstallDir\source"
 if (Test-Path $repoDir) {
@@ -321,17 +321,17 @@ if (Test-Path $repoDir) {
     }
 }
 
-# ─── Build ───
+# --- Build ---
 Write-Header "BUILDING"
 $buildStart = Get-Date
 
 Write-Host "  Compiling crates..." -ForegroundColor Cyan
-Write-Host "  → This will take 5-15 minutes on first build" -ForegroundColor DarkGray
+Write-Host "  > This will take 5-15 minutes on first build" -ForegroundColor DarkGray
 
 $env:CARGO_TERM_PROGRESS_WIDTH = 60
 & cargo build --release -p hypercowork-server 2>&1 | ForEach-Object {
     if ($_ -match "Compiling (\S+)") {
-        Write-Host "  ⟳ Compiling $($matches[1])..." -ForegroundColor DarkGray -NoNewline
+        Write-Host "  ~ Compiling $($matches[1])..." -ForegroundColor DarkGray -NoNewline
         Write-Host "`r" -NoNewline
     }
     if ($_ -match "error\[E\d+\]") {
@@ -348,7 +348,7 @@ Write-Done "Router built"
 $buildElapsed = (Get-Date) - $buildStart
 Write-Host "  Build time: $($buildElapsed.Minutes)m $($buildElapsed.Seconds)s" -ForegroundColor DarkGray
 
-# ─── Install Binaries ───
+# --- Install Binaries ---
 Write-Header "INSTALLING"
 
 Write-Step "Copying binaries..."
@@ -357,7 +357,7 @@ Copy-Item "$buildDir\hypercowork-server.exe" "$InstallDir\bin\" -Force
 Copy-Item "$buildDir\hypercowork-router.exe" "$InstallDir\bin\" -Force
 Write-Done "Binaries installed"
 
-# ─── Create Config Files ───
+# --- Create Config Files ---
 Write-Header "CONFIGURATION"
 
 # Server config - using single quotes so backslash and quotes are literal
@@ -382,7 +382,7 @@ cors_origins = []
 $configPath = "$InstallDir\config\server.toml"
 if (-not (Test-Path $configPath)) {
     $serverConfig | Out-File -FilePath $configPath -Encoding UTF8
-    Write-Done "Server config → $configPath"
+    Write-Done "Server config > $configPath"
 } else {
     Write-Skip "Config exists: $configPath"
 }
@@ -403,19 +403,19 @@ dedup_window_secs = 30
 $routerConfigPath = "$InstallDir\config\router.toml"
 if (-not (Test-Path $routerConfigPath)) {
     $routerConfig | Out-File -FilePath $routerConfigPath -Encoding UTF8
-    Write-Done "Router config → $routerConfigPath"
+    Write-Done "Router config > $routerConfigPath"
 } else {
     Write-Skip "Config exists: $routerConfigPath"
 }
 
-# ─── Create Launchers ───
+# --- Create Launchers ---
 Write-Header "SHORTCUTS"
 
 # Start server batch file - using single quotes for literal content
 $startServer = @'
 @echo off
 echo.
-echo   🦀 Starting HyperCoWork Server...
+echo   [R] Starting HyperCoWork Server...
 echo.
 cd /d "$InstallDir"
 "$InstallDir\bin\hypercowork-server.exe" --workspace "%cd%" --config "$InstallDir\config\server.toml"
@@ -423,13 +423,13 @@ pause
 '@
 $startServerPath = "$InstallDir\Start Server.bat"
 $startServer | Out-File -FilePath $startServerPath -Encoding ASCII
-Write-Done "Start Server → $startServerPath"
+Write-Done "Start Server > $startServerPath"
 
 # Start llama server batch file
 $startLlama = @'
 @echo off
 echo.
-echo   🦙 Starting llama.cpp server...
+echo   [L] Starting llama.cpp server...
 echo.
 
 set MODEL=%1
@@ -444,7 +444,7 @@ pause
 '@
 $startLlamaPath = "$InstallDir\Start llama-server.bat"
 $startLlama | Out-File -FilePath $startLlamaPath -Encoding ASCII
-Write-Done "Start llama-server → $startLlamaPath"
+Write-Done "Start llama-server > $startLlamaPath"
 
 # List models batch file
 $listModels = @'
@@ -461,7 +461,7 @@ pause
 '@
 $listModelsPath = "$InstallDir\List Models.bat"
 $listModels | Out-File -FilePath $listModelsPath -Encoding ASCII
-Write-Done "List Models → $listModelsPath"
+Write-Done "List Models > $listModelsPath"
 
 # Create hypercowork.bat launcher in bin (for PATH access)
 $hypercoworkBat = @'
@@ -480,7 +480,7 @@ Write-Done "Created hypercowork command in bin"
 $startFrontend = @'
 @echo off
 echo.
-echo   ⚡ Starting HyperCoWork Frontend...
+echo   > Starting HyperCoWork Frontend...
 echo.
 cd /d "$InstallDir\source\apps\frontend"
 bun install
@@ -488,7 +488,7 @@ bun dev
 '@
 $startFrontendPath = "$InstallDir\Start Frontend.bat"
 $startFrontend | Out-File -FilePath $startFrontendPath -Encoding ASCII
-Write-Done "Start Frontend → $startFrontendPath"
+Write-Done "Start Frontend > $startFrontendPath"
 
 # Create desktop shortcut
 $WshShell = New-Object -ComObject WScript.Shell
@@ -500,21 +500,21 @@ $Shortcut.Description = "Start HyperCoWork Rust Server"
 $Shortcut.Save()
 Write-Done "Desktop shortcut created"
 
-# ─── Summary ───
+# --- Summary ---
 Write-Header "DONE"
 Write-Host @"
 
-  ╔═══════════════════════════════════════════════════════════╗
-  ║  Installation complete!                                    ║
-  ╚═══════════════════════════════════════════════════════════╝
+  +===========================================================+
+  |  Installation complete!                                    |
+  +===========================================================+
 
   Install location: $InstallDir
 
   What's installed:
-    ✓ hypercowork-server.exe   (main server)
-    ✓ hypercowork-router.exe    (router)
-    ✓ Config files              (in config/)
-    ✓ Shortcut files           (in $InstallDir)
+    > hypercowork-server.exe   (main server)
+    > hypercowork-router.exe    (router)
+    > Config files              (in config/)
+    > Shortcut files           (in $InstallDir)
 
   To run:
     1. Download a model to models/
@@ -525,7 +525,7 @@ Write-Host @"
 
 "@ -ForegroundColor White
 
-# ─── Optional: Download Model ───
+# --- Optional: Download Model ---
 if (-not $SkipModels) {
     Write-Header "DOWNLOAD MODEL"
     Write-Host "  NOTE: Model download is optional and can be done later" -ForegroundColor DarkGray
@@ -546,7 +546,7 @@ if (-not $SkipModels) {
         } catch {
             Stop-Spinner
             Write-Warning "Download failed: $_"
-            Write-Host "  → Manually download from: $modelUrl" -ForegroundColor Yellow
+            Write-Host "  > Manually download from: $modelUrl" -ForegroundColor Yellow
         }
     }
 }
